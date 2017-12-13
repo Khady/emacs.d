@@ -203,12 +203,13 @@ the other blocks won't be exported.
   )
     #+END_SRC
 
-*** Autoreload
+*** Autorevert
 
     Auto reload file when there is a change
 
     #+BEGIN_SRC emacs-lisp
 (global-auto-revert-mode t)
+(diminish 'auto-revert-mode)
     #+END_SRC
 
 *** Compilation
@@ -862,6 +863,7 @@ rm ${ORG_DIR}/*.elc
   #+BEGIN_SRC emacs-lisp
 (use-package autopair
   :ensure t
+  :diminish
   :config
   (autopair-global-mode)                ; to enable in all buffers
   :hook
@@ -874,6 +876,7 @@ rm ${ORG_DIR}/*.elc
   #+BEGIN_SRC emacs-lisp
 (use-package whitespace
   :ensure t
+  :diminish global-whitespace-mode
   :custom
   (whitespace-style '(face empty tabs lines-tail trailing))
   (whitespace-line-column 160)
@@ -888,6 +891,7 @@ rm ${ORG_DIR}/*.elc
 
   #+BEGIN_SRC emacs-lisp
 (use-package editorconfig
+  :diminish
   :ensure t
   :config
   (progn (editorconfig-mode t))
@@ -944,8 +948,15 @@ rm ${ORG_DIR}/*.elc
 (setq git-commit-summary-max-length 72)
   #+END_SRC
 
+  ~git-gutter~ is explicitely installed because it can't be diminished
+  from ~git-gutter-fringe~.
 
   #+BEGIN_SRC emacs-lisp
+(use-package git-gutter
+  :ensure t
+  :diminish
+  )
+
 (use-package git-gutter-fringe
   :ensure t
   :custom
@@ -1220,6 +1231,7 @@ rm ${ORG_DIR}/*.elc
   #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :ensure t
+  :diminish
   :config
   (global-undo-tree-mode)
   )
