@@ -3,6 +3,7 @@
 
 (setq mc/cmds-to-run-for-all
       '(
+        autopair-insert-opening
         org-self-insert-command
         ))
 
