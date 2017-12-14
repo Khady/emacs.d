@@ -148,6 +148,11 @@ the other blocks won't be exported.
 (set-keyboard-coding-system 'utf-8) ; pretty
 (set-selection-coding-system 'utf-8) ; please
 (prefer-coding-system 'utf-8) ; with sugar on top
+
+(when (display-graphic-p)
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+
+;; no tabs
 (setq-default indent-tabs-mode nil)
 
 ;; Turn off the blinking cursor
@@ -172,7 +177,11 @@ the other blocks won't be exported.
 
 ;; Don't beep at me
 (setq visible-bell t)
+
+;; Don't load old .elc files when the .el file is newer
+(setq load-prefer-newer t)
   #+END_SRC
+
 
 *** Backups
 
@@ -441,7 +450,7 @@ rm ${ORG_DIR}/*.elc
                                "** TODO %i%?")
                               ("t" "Deadline [inbox]" entry
                                (file+headline "~/Notes/ahrefs.org" "Inbox")
-                               "** %i%? %^g\n   DEADLINE:%^{Deadline}t")
+                               "** TODO %i%? %^g\n   DEADLINE:%^{Deadline}t")
                               ))
 
 ;; Place tags close to the right-hand side of the window
@@ -547,6 +556,13 @@ rm ${ORG_DIR}/*.elc
 (bind-key "M-<right>" 'windmove-right)
 (bind-key "M-<left>" 'windmove-left)
   #+END_SRC
+
+  It could be done like this too:
+
+  #+BEGIN_SRC emacs-lisp :tangle no
+(windmove-default-keybindings "meta")
+  #+END_SRC
+
 
   Whenever I split windows, I usually do so and also switch to the other
   window as well, so might as well rebind the splitting key bindings to
