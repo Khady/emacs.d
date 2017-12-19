@@ -1430,14 +1430,6 @@ whether or not a region is selected."
   (interactive)
   (buffer-same-mode #'next-buffer))
 
-;; use the path set with the zshrc to work in gui mode
-(let ((path (shell-command-to-string ". ~/.zshrc; echo -n $PATH:/home/louis/Code/megaindex/v2/render_server/node_modules/tslint/bin")))
-  (setenv "PATH" path)
-  (setq exec-path
-        (append
-         (split-string-and-unquote path ":")
-         exec-path)))
-
 ;; Remove "<clone>" from a name if present.
 (defun get-clone-original-name (name)
   (let ((clone "<clone>"))
