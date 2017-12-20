@@ -1032,8 +1032,24 @@ rm ${ORG_DIR}/*.elc
    #+END_SRC
 
 ** Github
+*** git-link
 
-   #+BEGIN_SRC emacs-lisp
+    #+BEGIN_SRC emacs-lisp
+(use-package git-link
+  :ensure t
+  :custom
+  (git-link-use-commit 't)
+  :config
+  (add-to-list 'git-link-remote-alist
+               '("git\\.ahrefs\\.com" git-link-github))
+  )
+    #+END_SRC
+
+*** Handmade
+
+    Doesn't handle region properly
+
+   #+BEGIN_SRC emacs-lisp :tangle no
 (use-package seq)
 (use-package simple)
 
@@ -1078,7 +1094,7 @@ rm ${ORG_DIR}/*.elc
   "Make a URL for referencing the line at `point' in github. This
    assumes that the file is unmodified, that the commit is present
    in origin, as well as many suppositions of dubious merit."
-
+  (use-region-p)
   (let
       ((file (git-file-name (buffer-file-name (current-buffer))))
        (line (line-number-at-pos (point)))
@@ -1093,6 +1109,21 @@ rm ${ORG_DIR}/*.elc
   (interactive)
   (kill-new (make-github-url)))
    #+END_SRC
+
+* Mercurial
+** Monky
+
+  #+BEGIN_SRC emacs-lisp :tangle no
+(use-package monky
+  :ensure t)
+  #+END_SRC
+
+** ahg
+
+  #+BEGIN_SRC emacs-lisp :tangle no
+(use-package ahg
+  :ensure t)
+  #+END_SRC
 
 * Helm
 

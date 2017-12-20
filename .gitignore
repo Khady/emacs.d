@@ -12,3 +12,5 @@
 /eshell
 /*.cache
 /.places
+/.hg
+/.hgignore

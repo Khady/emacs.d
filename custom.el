@@ -6,7 +6,7 @@
  '(blink-matching-paren t)
  '(blink-matching-paren-dont-ignore-comments t)
  '(blink-matching-paren-on-screen t)
- '(company-quickhelp-delay 0 t)
+ '(company-quickhelp-delay 0)
  '(company-tooltip-align-annotations t)
  '(custom-safe-themes
    (quote
@@ -14,7 +14,7 @@
  '(doom-themes-enable-bold t)
  '(doom-themes-enable-italic t)
  '(git-gutter-fr:side (quote right-fringe))
- '(helm-M-x-fuzzy-match t t)
+ '(helm-M-x-fuzzy-match t)
  '(helm-buffers-fuzzy-matching t)
  '(helm-completion-in-region-fuzzy-match t)
  '(helm-ff-fuzzy-matching t)
@@ -25,7 +25,7 @@
  '(linum-format " %2d")
  '(package-selected-packages
    (quote
-    (git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
+    (ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
  '(projectile-completion-system (quote helm))
  '(projectile-enable-caching t)
  '(projectile-switch-project-action (quote helm-projectile-find-file))
