@@ -4,7 +4,9 @@
 (setq mc/cmds-to-run-for-all
       '(
         autopair-insert-opening
+        end-of-visual-line
         org-self-insert-command
+        typescript-insert-and-indent
         ))
 
 (setq mc/cmds-to-run-once
