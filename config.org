@@ -712,6 +712,10 @@ rm ${ORG_DIR}/*.elc
    #+BEGIN_SRC emacs-lisp
 (use-package tide
   :ensure t
+  :bind (:map tide-mode-map
+              ("C-c C-o" . tide-references)
+              ("C-c C-r" . tide-rename-symbol)
+              )
   :init
   (defun setup-tide-mode ()
     (interactive)
