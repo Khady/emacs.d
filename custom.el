@@ -25,7 +25,7 @@
  '(linum-format " %2d")
  '(package-selected-packages
    (quote
-    (nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
+    (reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
  '(projectile-completion-system (quote helm))
  '(projectile-enable-caching t)
  '(projectile-switch-project-action (quote helm-projectile-find-file))
