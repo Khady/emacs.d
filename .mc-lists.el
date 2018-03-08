@@ -4,14 +4,21 @@
 (setq mc/cmds-to-run-for-all
       '(
         autopair-insert-opening
+        autopair-insert-or-skip-quote
+        autopair-skip-close-maybe
         beginning-of-visual-line
         comment-dwim
         end-of-visual-line
+        kill-region-or-word
+        org-delete-char
         org-self-insert-command
+        tuareg-comment-dwim
         typescript-insert-and-indent
+        yaml-electric-dash-and-dot
         ))
 
 (setq mc/cmds-to-run-once
       '(
         iedit-switch-to-mc-mode
+        undo-tree-visualize
         ))

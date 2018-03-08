@@ -7,6 +7,7 @@
  '(blink-matching-paren-dont-ignore-comments t)
  '(blink-matching-paren-on-screen t)
  '(company-quickhelp-delay 0)
+ '(company-quickhelp-mode t)
  '(company-tooltip-align-annotations t)
  '(custom-safe-themes
    (quote
@@ -14,6 +15,7 @@
  '(doom-themes-enable-bold t)
  '(doom-themes-enable-italic t)
  '(git-gutter-fr:side (quote right-fringe))
+ '(git-link-use-commit t)
  '(helm-M-x-fuzzy-match t)
  '(helm-buffers-fuzzy-matching t)
  '(helm-completion-in-region-fuzzy-match t)
@@ -23,9 +25,11 @@
  '(js-indent-level 2)
  '(json-reformat:indent-width 1)
  '(linum-format " %2d")
+ '(merlin-command (quote opam))
+ '(merlin-completion-with-doc t)
  '(package-selected-packages
    (quote
-    (reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
+    (edit-indirect zerodark-theme monokai-theme reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
  '(projectile-completion-system (quote helm))
  '(projectile-enable-caching t)
  '(projectile-switch-project-action (quote helm-projectile-find-file))
