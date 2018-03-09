@@ -21,18 +21,22 @@
  '(helm-completion-in-region-fuzzy-match t)
  '(helm-ff-fuzzy-matching t)
  '(helm-mode-fuzzy-match t)
- '(helm-recentf-fuzzy-match t)
+ '(helm-recentf-fuzzy-match t t)
  '(js-indent-level 2)
  '(json-reformat:indent-width 1)
  '(linum-format " %2d")
  '(merlin-command (quote opam))
  '(merlin-completion-with-doc t)
+ '(org-agenda-files
+   (quote
+    ("~/Code/github/emacs.d/config.org" "~/Notes/ahrefs.org" "~/Notes/beorg-local.org")))
  '(package-selected-packages
    (quote
     (edit-indirect zerodark-theme monokai-theme reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors expand-region magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode indium tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
  '(projectile-completion-system (quote helm))
  '(projectile-enable-caching t)
  '(projectile-switch-project-action (quote helm-projectile-find-file))
+ '(save-place t)
  '(save-place-file "/home/louis/.emacs.d/.places")
  '(save-place-mode t)
  '(show-paren-delay 0)

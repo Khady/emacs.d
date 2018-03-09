@@ -667,7 +667,7 @@ rm ${ORG_DIR}/*.elc
    #+END_SRC
 
 * Languages
-** Ocaml
+** Ocaml/Reason
 
    Setup environment variables using opam
 
@@ -748,7 +748,7 @@ rm ${ORG_DIR}/*.elc
   :ensure t
   :bind (:map tide-mode-map
               ("C-c C-o" . tide-references)
-              ("C-c C-r" . tide-rename-symbol)
+              ("C-c C-e" . tide-rename-symbol)
               )
   :init
   (defun setup-tide-mode ()
