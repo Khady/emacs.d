@@ -53,7 +53,7 @@
 
 ** Monokai theme
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+   #+BEGIN_SRC emacs-lisp
 (use-package monokai-theme
   :if (window-system)
   :ensure t
@@ -67,17 +67,14 @@
 
    #+BEGIN_SRC emacs-lisp
 (use-package zenburn-theme
-  :if (not window-system)
-  :ensure t
-  :config
-  )
+  :ensure t)
    #+END_SRC
 
 ** Zerodark theme
 
    A dark theme for Emacs, inspired from Niflheim and One Dark
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+   #+BEGIN_SRC emacs-lisp
 (use-package zerodark-theme
   :ensure t)
    #+END_SRC
@@ -649,6 +646,7 @@ rm ${ORG_DIR}/*.elc
   (company-tooltip-align-annotations t)
   :hook
   (prog-mode . company-mode)
+  (utop-mode . company-mode)
   :config
   (company-quickhelp-mode 1)
   :bind
