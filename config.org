@@ -53,7 +53,7 @@
 
 ** Monokai theme
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
 (use-package monokai-theme
   :if (window-system)
   :ensure t
@@ -67,6 +67,7 @@
 
    #+BEGIN_SRC emacs-lisp
 (use-package zenburn-theme
+  :if (not window-system)
   :ensure t)
    #+END_SRC
 
@@ -74,39 +75,9 @@
 
    A dark theme for Emacs, inspired from Niflheim and One Dark
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
 (use-package zerodark-theme
   :ensure t)
-   #+END_SRC
-
-** Choose theme
-
-   Use environment variables to choose theme.
-
-   #+BEGIN_SRC emacs-lisp
-(setq-local louis/default-theme (if (window-system) 'doom-molokai 'zenburn))
-(setq-local louis/bad-id-theme 'whiteboard)
-
-(let ((count-themes 1)
-      (louis/themes-ids (make-hash-table :size 30))
-      (louis/themes-names (make-hash-table :size 30 :test 'equal))
-      (env-theme-name (getenv "EN"))
-      (env-theme-id (getenv "EI")))
-  (mapc
-   (lambda (theme)
-     (puthash count-themes theme louis/themes-ids)
-     (puthash (symbol-name theme) theme louis/themes-names)
-     (setq count-themes (+ 1 count-themes)))
-   (custom-available-themes))
-  (setq-local
-   louis/selected-theme
-   (if env-theme-name
-       (gethash env-theme-name louis/themes-names louis/bad-id-theme)
-     (if env-theme-id
-         (gethash (string-to-number env-theme-id) louis/themes-ids louis/bad-id-theme)
-       louis/default-theme
-       )))
-  (load-theme louis/selected-theme t))
    #+END_SRC
 
 ** Convenient theme functions
@@ -128,6 +99,43 @@
   "Disables any currently active themes listed in `custom-enabled-themes'."
   (interactive)
   (mapc #'disable-theme custom-enabled-themes))
+   #+END_SRC
+
+** Choose theme
+
+   Use environment variables to choose theme.
+
+   #+BEGIN_SRC emacs-lisp
+(setq-local louis/default-theme (if (window-system) 'doom-molokai 'zenburn))
+(setq-local louis/bad-id-theme 'whiteboard)
+
+(defun louis--print-env-theme (kind expected)
+  (message "Looking for theme %s `%s' detected from the env..." kind expected))
+
+(let ((count-themes 1)
+      (themes-ids (make-hash-table :size 30))
+      (themes-names (make-hash-table :size 30 :test #'equal))
+      (env-theme-name (getenv "EN"))
+      (env-theme-id (getenv "EI")))
+  (dolist (theme (custom-available-themes))
+    (puthash count-themes theme themes-ids)
+    (puthash (symbol-name theme) theme themes-names)
+    (setq count-themes (+ 1 count-themes)))
+  (setq-local
+   selected-theme
+   (if env-theme-name
+       (progn
+         (louis--print-env-theme "name" env-theme-name)
+         (gethash env-theme-name themes-names louis/bad-id-theme))
+     (if env-theme-id
+       (progn
+         (louis--print-env-theme "id" env-theme-id)
+         (gethash (string-to-number env-theme-id) themes-ids louis/bad-id-theme))
+       louis/default-theme
+       )))
+  (disable-active-themes)
+  (message "Loading theme `%s'..." selected-theme)
+  (load-theme selected-theme t))
    #+END_SRC
 
 * Font
@@ -645,8 +653,7 @@ rm ${ORG_DIR}/*.elc
   (company-quickhelp-delay 0)
   (company-tooltip-align-annotations t)
   :hook
-  (prog-mode . company-mode)
-  (utop-mode . company-mode)
+  ((prog-mode utop-mode) . company-mode)
   :config
   (company-quickhelp-mode 1)
   :bind
@@ -667,77 +674,188 @@ rm ${ORG_DIR}/*.elc
 * Languages
 ** Ocaml/Reason
 
-   Setup environment variables using opam
+   Util function to select where to load merlin from.
+
+   #+BEGIN_SRC emacs-lisp
+(defun shell-cmd (cmd)
+  "Returns the stdout output of a shell command or nil if the command returned
+     an error"
+  (car (ignore-errors (apply 'process-lines (split-string cmd)))))
+
+(setq opam-p (shell-cmd "which opam"))
+(setq reason-p (shell-cmd "which refmt"))
+   #+END_SRC
+
+*** Load opam
+
+   Setup environment variables using opam.
 
    #+BEGIN_SRC emacs-lisp :tangle no
-(dolist (var (car (read-from-string (shell-command-to-string "opam config env --sexp"))))
-  (setenv (car var) (cadr var)))
+(if opam-p
+    (dolist (var (car (read-from-string (shell-command-to-string "opam config env --sexp"))))
+      (setenv (car var) (cadr var))))
    #+END_SRC
 
    Add opam libs.
 
    #+BEGIN_SRC emacs-lisp
-(let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
-  (when (and opam-share (file-directory-p opam-share))
-    (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
-    ))
+(if opam-p
+    (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
+      (when (and opam-share (file-directory-p opam-share))
+        (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
    #+END_SRC
 
-   Install caml, reasonml and tuareg modes.
-
-   We don't need the tuareg package from the emacs repositories, it
-   comes from opam.
+*** caml, reasonml and tuareg modes
 
    ~caml~ is required because ~caml-types-expr-face~ is used by merlin.
 
    #+BEGIN_SRC emacs-lisp
 (use-package caml
   :ensure t)
-(use-package tuareg
-  :mode ("\\.ml[ily]?$" . tuareg-mode))
-(use-package reason-mode
-  :ensure t)
    #+END_SRC
+
+   We don't need the tuareg package from the emacs repositories, it
+   comes from opam.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package tuareg
+  :if opam-p
+  :mode ("\\.ml[ily]?$" . tuareg-mode))
+   #+END_SRC
+
+   When using ~reason-mode~, we want to load merlin from
+   ~node_modules~ rather than opam.
+
+   #+BEGIN_SRC emacs-lisp
+(use-package reason-mode
+  :if reason-p
+  :ensure t
+  :config
+  (let* ((refmt-bin (or (shell-cmd "refmt ----where")
+                        (shell-cmd "which refmt")))
+         (merlin-bin (or (shell-cmd "ocamlmerlin ----where")
+                         (shell-cmd "which ocamlmerlin")))
+         (merlin-base-dir (when merlin-bin
+                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-bin))))
+    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
+    (when merlin-bin
+      (add-to-list 'load-path (concat merlin-base-dir "share/emacs/site-lisp/"))
+      (setq merlin-command merlin-bin))
+    (when refmt-bin
+      (setq refmt-command refmt-bin)))
+  )
+   #+END_SRC
+
+*** ocp tools
 
    Require ocp stuff first because of conflicts between shortcuts.
    It is installed from opam, ~ensure~ is not required.
 
    #+BEGIN_SRC emacs-lisp
-(use-package ocp-indent)
-(use-package ocp-index)
+(use-package ocp-indent :if opam-p)
+(use-package ocp-index :if opam-p)
    #+END_SRC
+
+*** merlin
 
    Configure merlin. Magical autocompletion and IDE features.
 
    #+BEGIN_SRC emacs-lisp
 (use-package merlin
   :custom
-  (merlin-command 'opam)
   (merlin-completion-with-doc t)
-  (company-quickhelp-mode t)
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
-              ("C-c C-o" . merlin-occurrences)
+              ("M-?" . merlin-occurrences)
               ("C-c C-j" . merlin-jump)
               ("C-c i" . merlin-locate-ident)
               ("C-c C-e" . merlin-iedit-occurrences)
               )
   :hook
   ;; Start merlin on ml files
-  (reason-mode . merlin-mode)
-  (tuareg-mode . merlin-mode)
-  (caml-mode-hook . merlin-mode)
+  ((reason-mode tuareg-mode caml-mode) . merlin-mode)
   )
    #+END_SRC
 
+*** utop
+
    #+BEGIN_SRC emacs-lisp
 (use-package utop
+  :custom
+  (utop-edit-command nil)
   :hook
-  (tuareg-mode . utop-minor-mode)
-  (reason-mode . utop-minor-mode)
+  (tuareg-mode . (lambda ()
+                   (setq utop-command "utop -emacs")
+                   (utop-minor-mode)))
+  (reason-mode . (lambda ()
+                   (setq utop-command "rtop -emacs")
+                   (setq utop-prompt
+                         (lambda ()
+                           (let ((prompt (format "rtop[%d]> " utop-command-number)))
+                             (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
+                             prompt)))
+                   (utop-minor-mode)))
   )
    #+END_SRC
+
+*** Auto highlight and type of identifier under point
+
+    #+BEGIN_SRC emacs-lisp
+(defcustom merlin-hl-identifier-idle-time 0.50
+  "How long to wait after user input before highlighting the current identifier."
+  :type 'float
+  :group 'merlin)
+
+(defvar merlin--hl-identifier-timer
+  nil
+  "The global timer used for highlighting identifiers.")
+
+;; (thing-at-point 'symbol)
+
+(defun merlin--hl-type ()
+  (interactive)
+  ;; reset verbosity to avoid diplaying deeper types
+  (setq merlin--verbosity-cache nil)
+  (unless (or (minibufferp)
+              (string-match "*" (buffer-name)))
+    (if (region-active-p)
+        (merlin--type-region)
+      (merlin--type-enclosing-query)
+      (when merlin-enclosing-types
+        (let ((data (elt merlin-enclosing-types merlin-enclosing-offset)))
+          (if (cddr data)
+              (if (merlin--is-short (merlin--type-enclosing-text data))
+                  (merlin--type-display (cdr data) (merlin--type-enclosing-text data))
+                (message "type is too long, check buffer `*merlin-types*' or query the type manually"))))
+        (merlin--type-enclosing-after))))
+  )
+
+(defun merlin--hl-identifiers-function ()
+  "Function run after an idle timeout, highlighting the
+identifier at point, if necessary."
+  (when merlin-hl-identifier-mode
+    (merlin--hl-type)
+    (unless (eq merlin--current-hl-identifier-idle-time merlin-hl-identifier-idle-time)
+      (merlin--hl-set-timer))))
+
+(defun merlin--hl-set-timer ()
+  (if merlin--hl-identifier-timer
+      (cancel-timer merlin--hl-identifier-timer))
+  (setq merlin--current-hl-identifier-idle-time merlin-hl-identifier-idle-time)
+  (setq merlin--hl-identifier-timer (run-with-idle-timer
+                                     merlin-hl-identifier-idle-time
+                                     t
+                                     #'merlin--hl-identifiers-function)))
+
+(define-minor-mode merlin-hl-identifier-mode
+  "Highlight instances of the identifier at point after a short
+timeout."
+  :group 'merlin
+  (if merlin-hl-identifier-mode
+      (unless (or (minibufferp) (string-match "*" (buffer-name)))
+        (merlin--hl-set-timer))))
+    #+END_SRC
 
 ** Typescript
 
@@ -745,7 +863,7 @@ rm ${ORG_DIR}/*.elc
 (use-package tide
   :ensure t
   :bind (:map tide-mode-map
-              ("C-c C-o" . tide-references)
+              ("M-?" . tide-references)
               ("C-c C-e" . tide-rename-symbol)
               )
   :init
@@ -864,6 +982,16 @@ rm ${ORG_DIR}/*.elc
   :ensure t)
    #+END_SRC
 
+** Lisp
+
+   #+BEGIN_SRC emacs-lisp
+(use-package elisp-def
+  :ensure t
+  :hook
+  (emacs-lisp . elisp-def-mode)
+  )
+   #+END_SRC
+
 * Misc
 
 *** Display Time
@@ -963,6 +1091,17 @@ rm ${ORG_DIR}/*.elc
   :ensure t
   :config
   (progn (editorconfig-mode t))
+  )
+  #+END_SRC
+
+* Indentation
+
+  #+BEGIN_SRC emacs-lisp
+(use-package aggressive-indent
+  :ensure t
+  :hook (prog-mode . aggressive-indent-mode)
+  :config
+  (add-to-list 'aggressive-indent-excluded-modes 'tuareg-mode)
   )
   #+END_SRC
 
@@ -1216,6 +1355,11 @@ rm ${ORG_DIR}/*.elc
   #+END_SRC
 
   #+BEGIN_SRC emacs-lisp :tangle no
+(use-package helm-ag
+  :ensure t)
+  #+END_SRC
+
+  #+BEGIN_SRC emacs-lisp :tangle no
 (use-package org-projectile-helm
   :ensure t)
   #+END_SRC
@@ -1351,6 +1495,7 @@ rm ${ORG_DIR}/*.elc
 (use-package vline
   :ensure t)
   #+END_SRC
+
 * Restclient
 
   See [[http://emacsrocks.com/e15.html][Emacs Rocks! Episode 15]] to learn how restclient can help out with
@@ -1409,6 +1554,7 @@ rm ${ORG_DIR}/*.elc
   #+BEGIN_SRC emacs-lisp
 (setq-default gdb-many-windows t)
   #+END_SRC
+
 * Utils
 
   #+BEGIN_SRC emacs-lisp
@@ -1698,3 +1844,4 @@ whether or not a region is selected."
 (bind-key "C-S-<iso-lefttab>" 'previous-buffer-same-mode)
 (bind-key "C-<tab>" 'next-buffer-same-mode)
   #+END_SRC
+
