@@ -805,6 +805,11 @@ rm ${ORG_DIR}/*.elc
   :hook
   (tuareg-mode . (lambda ()
                    (setq utop-command "utop -emacs")
+                   (setq utop-prompt
+                         (lambda ()
+                           (let ((prompt (format "utop[%d]> " utop-command-number)))
+                             (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
+                             prompt)))
                    (utop-minor-mode)))
   (reason-mode . (lambda ()
                    (setq utop-command "rtop -emacs")
