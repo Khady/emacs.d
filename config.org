@@ -361,6 +361,15 @@
 (setq auto-revert-verbose nil)
   #+END_SRC
 
+* Direnv
+
+  #+BEGIN_SRC emacs-lisp
+(use-package direnv
+  :ensure t
+  :config
+  (direnv-mode))
+  #+END_SRC
+
 * Org mode
 ** Installation
 
@@ -684,6 +693,15 @@ rm ${ORG_DIR}/*.elc
 
 (setq opam-p (shell-cmd "which opam"))
 (setq reason-p (shell-cmd "which refmt"))
+(defun shell-cmd-where (cmd)
+  (let ((where (shell-cmd cmd)))
+    (if (string-equal "unknown flag ----where" where)
+        nil
+      where)))
+(defun ocamlmerlin-where ()
+  (shell-cmd-where "ocamlmerlin ----where"))
+(defun refmt-where ()
+  (shell-cmd-where "refmt ----where"))
    #+END_SRC
 
 *** Load opam
@@ -730,19 +748,19 @@ rm ${ORG_DIR}/*.elc
 (use-package reason-mode
   :if reason-p
   :ensure t
+  :bind (:map reason-mode-map
+              ("C-M-\\" . refmt))
   :config
-  (let* ((refmt-bin (or (shell-cmd "refmt ----where")
-                        (shell-cmd "which refmt")))
-         (merlin-bin (or (shell-cmd "ocamlmerlin ----where")
-                         (shell-cmd "which ocamlmerlin")))
-         (merlin-base-dir (when merlin-bin
-                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-bin))))
+  (let* ((refmt-reason (refmt-where))
+         (merlin-reason (ocamlmerlin-where))
+         (reason-base-dir (when merlin-reason
+                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
     ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
-    (when merlin-bin
-      (add-to-list 'load-path (concat merlin-base-dir "share/emacs/site-lisp/"))
-      (setq merlin-command merlin-bin))
-    (when refmt-bin
-      (setq refmt-command refmt-bin)))
+    (when reason-base-dir
+      (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
+      (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
+    (when refmt-reason
+      (setq refmt-command refmt-reason)))
   )
    #+END_SRC
 
@@ -764,14 +782,14 @@ rm ${ORG_DIR}/*.elc
 (use-package merlin
   :custom
   (merlin-completion-with-doc t)
+  (merlin-command "ocamlmerlin")
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
               ("M-?" . merlin-occurrences)
               ("C-c C-j" . merlin-jump)
               ("C-c i" . merlin-locate-ident)
-              ("C-c C-e" . merlin-iedit-occurrences)
-              )
+              ("C-c C-e" . merlin-iedit-occurrences))
   :hook
   ;; Start merlin on ml files
   ((reason-mode tuareg-mode caml-mode) . merlin-mode)
@@ -1099,9 +1117,10 @@ timeout."
   #+BEGIN_SRC emacs-lisp
 (use-package aggressive-indent
   :ensure t
-  :hook (prog-mode . aggressive-indent-mode)
   :config
-  (add-to-list 'aggressive-indent-excluded-modes 'tuareg-mode)
+  (global-aggressive-indent-mode 1)
+  (dolist (mode '(tuareg-mode reason-mode))
+    (add-to-list 'aggressive-indent-excluded-modes mode))
   )
   #+END_SRC
 

@@ -12,6 +12,7 @@
         kill-region-or-word
         org-delete-char
         org-self-insert-command
+        org-yank
         tuareg-comment-dwim
         typescript-insert-and-indent
         yaml-electric-dash-and-dot
