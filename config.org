@@ -693,15 +693,15 @@ rm ${ORG_DIR}/*.elc
 
 (setq opam-p (shell-cmd "which opam"))
 (setq reason-p (shell-cmd "which refmt"))
-(defun shell-cmd-where (cmd)
+(defun reason-cmd-where (cmd)
   (let ((where (shell-cmd cmd)))
     (if (string-equal "unknown flag ----where" where)
         nil
       where)))
 (defun ocamlmerlin-where ()
-  (shell-cmd-where "ocamlmerlin ----where"))
+  (reason-cmd-where "ocamlmerlin ----where"))
 (defun refmt-where ()
-  (shell-cmd-where "refmt ----where"))
+  (reason-cmd-where "refmt ----where"))
    #+END_SRC
 
 *** Load opam
@@ -888,6 +888,7 @@ timeout."
   :bind (:map tide-mode-map
               ("M-?" . tide-references)
               ("C-c C-e" . tide-rename-symbol)
+              ("C-c C-x" . flycheck-next-error)
               )
   :init
   (defun setup-tide-mode ()
