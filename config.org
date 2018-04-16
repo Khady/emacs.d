@@ -1,4 +1,5 @@
 #+TITLE: Emacs configuration
+#+STARTUP: overview
 
 # note: if there is at least one block marked with =:tangle yes=, all
 # the other blocks won't be exported.
@@ -145,12 +146,11 @@
   #+BEGIN_SRC emacs-lisp
 (cond
  ((member "PragmataPro" (font-family-list))
-  (set-face-attribute 'default nil :font "PragmataPro-12"))
+  (set-face-attribute 'default nil :font "PragmataPro-11"))
  ((member "Ubuntu Mono" (font-family-list))
   (set-face-attribute 'default nil :font "Ubuntu Mono-11"))
  ((member "DejaVu Sans Mono" (font-family-list))
-  (set-face-attribute 'default nil :font "DejaVu Sans Mono-11"))
- )
+  (set-face-attribute 'default nil :font "DejaVu Sans Mono-11")))
   #+END_SRC
 
   Note: To view all fonts that are available to use, run the following:
@@ -228,7 +228,6 @@
 (setq delete-old-versions -1)
 (setq version-control t)
 (setq vc-make-backup-files t)
-(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
     #+END_SRC
 
 *** Saveplace
@@ -272,6 +271,18 @@
 (setq-default explicit-shell-file-name "/bin/bash")
 (setq-default shell-file-name "/bin/bash")
     #+END_SRC
+
+*** Interlock files
+
+    Interlock files are the ~.#*~ files created by emacs when a file
+    is edited and has not been saved yet. It is possible to disable
+    them using this snippet.
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+(setq create-lockfiles nil)
+    #+END_SRC
+
+    See https://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
 
 * Terminal
 
@@ -363,7 +374,7 @@
 
 * Direnv
 
-  #+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp :tangle no
 (use-package direnv
   :ensure t
   :config
@@ -523,6 +534,20 @@ rm ${ORG_DIR}/*.elc
 (setq org-highlight-latex-and-related '(latex script entities))
    #+END_SRC
 
+   Disable =validate= link at the end of html export
+
+   #+BEGIN_SRC emacs-lisp
+(setq org-html-validation-link nil)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(setq org-startup-folded 'showeverything)
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(setq org-html-htmlize-output-type 'css)
+   #+END_SRC
+
 ** Org babel languages
 
    #+BEGIN_SRC emacs-lisp
@@ -576,6 +601,52 @@ rm ${ORG_DIR}/*.elc
       org-src-strip-leading-and-trailing-blank-lines t
       org-src-preserve-indentation t
       org-src-tab-acts-natively t)
+   #+END_SRC
+
+** Org publish
+
+   #+BEGIN_SRC emacs-lisp
+(setq org-publish-project-alist
+      '(("posts-org"
+         :base-directory "~/Notes/posts"
+         :base-extension "org"
+         :publishing-directory "~/Notes/publish"
+         :publishing-function org-html-publish-to-html
+         :htmlized-source t
+         :html-doctype "html5"
+         :html-head-include-default-style nil
+         :html-html5-fancy t
+         :html-htmlized-css-url "/org.css" ; from https://github.com/gongzhitaao/orgcss
+         :section-numbers nil
+         :auto-sitemap t
+         :html-postamble
+         "<a class=\"author\" href=\"https://khady.info\">%a</a> <span class=\"date\">%d</span>
+          <span class=\"creator\">%c</span>"
+         :html-link-home "archive.html"
+         :sitemap-filename "archive.org"
+         :sitemap-title "Archive"
+         :sitemap-sort-files anti-chronologically
+         :sitemap-style list
+         :with-statistics-cookies nil)
+        ("posts-static"
+         :base-directory "~/Notes/posts/"
+         :base-extension "css"
+         :publishing-directory "~/Notes/publish/"
+         :recursive t
+         :publishing-function org-publish-attachment)
+        ("posts" :components ("posts-org" "posts-static"))))
+   #+END_SRC
+
+   #+BEGIN_SRC emacs-lisp
+(add-to-list 'org-structure-template-alist
+             '("b" "#+TITLE: ?
+,#+TITLE: ?
+,#+DATE: ?
+,#+DESCRIPTION: ?
+,#+KEYWORDS: ?
+,#+LANGUAGE: en
+,#+BEGIN_PREVIEW
+,#+END_PREVIEW"))
    #+END_SRC
 
 * Tramp
@@ -706,7 +777,8 @@ rm ${ORG_DIR}/*.elc
 
 *** Load opam
 
-   Setup environment variables using opam.
+   Setup environment variables using opam. To be used if the env is
+   not configured before to launch emacs.
 
    #+BEGIN_SRC emacs-lisp :tangle no
 (if opam-p
@@ -742,7 +814,8 @@ rm ${ORG_DIR}/*.elc
    #+END_SRC
 
    When using ~reason-mode~, we want to load merlin from
-   ~node_modules~ rather than opam.
+   ~node_modules~ if it is available there. Otherwise it will come
+   from opam.
 
    #+BEGIN_SRC emacs-lisp
 (use-package reason-mode
@@ -753,7 +826,7 @@ rm ${ORG_DIR}/*.elc
   :custom (refmt-width-mode 'fill)
   :config
   (defun set-reason-fill-column ()
-    (set-fill-column 120))
+    (set-fill-column 100))
   (let* ((refmt-reason (refmt-where))
          (merlin-reason (ocamlmerlin-where))
          (reason-base-dir (when merlin-reason
@@ -764,7 +837,7 @@ rm ${ORG_DIR}/*.elc
       (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
     (when refmt-reason
       (setq refmt-command refmt-reason)))
-  :hook (set-reason-full-column))
+  :hook (reason-mode . set-reason-fill-column))
    #+END_SRC
 
 *** ocp tools
@@ -773,8 +846,8 @@ rm ${ORG_DIR}/*.elc
    It is installed from opam, ~ensure~ is not required.
 
    #+BEGIN_SRC emacs-lisp
-(use-package ocp-indent :if opam-p)
-(use-package ocp-index :if opam-p)
+(use-package ocp-indent :if (shell-cmd "which ocp-indent"))
+(use-package ocp-index :if (shell-cmd "which ocp-index"))
    #+END_SRC
 
 *** merlin
@@ -795,8 +868,7 @@ rm ${ORG_DIR}/*.elc
               ("C-c C-e" . merlin-iedit-occurrences))
   :hook
   ;; Start merlin on ml files
-  ((reason-mode tuareg-mode caml-mode) . merlin-mode)
-  )
+  ((reason-mode tuareg-mode caml-mode) . merlin-mode))
    #+END_SRC
 
 *** utop
@@ -821,11 +893,12 @@ rm ${ORG_DIR}/*.elc
                            (let ((prompt (format "rtop[%d]> " utop-command-number)))
                              (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
                              prompt)))
-                   (utop-minor-mode)))
-  )
+                   (utop-minor-mode))))
    #+END_SRC
 
 *** Auto highlight and type of identifier under point
+
+    WIP, not ready to be used seriously yet.
 
     #+BEGIN_SRC emacs-lisp
 (defcustom merlin-hl-identifier-idle-time 0.50
@@ -1038,7 +1111,7 @@ timeout."
 
 * Emacsclient
 
-  #+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp :tangle no
 (use-package server
   :config
   (server-start))

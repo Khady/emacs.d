@@ -11,9 +11,11 @@
         end-of-visual-line
         kill-region-or-word
         org-delete-char
+        org-end-of-line
         org-self-insert-command
         org-yank
         tuareg-comment-dwim
+        tuareg-indent-phrase
         typescript-insert-and-indent
         yaml-electric-dash-and-dot
         ))
