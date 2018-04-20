@@ -146,11 +146,11 @@
   #+BEGIN_SRC emacs-lisp
 (cond
  ((member "PragmataPro" (font-family-list))
-  (set-face-attribute 'default nil :font "PragmataPro-11"))
+  (set-face-attribute 'default nil :font "PragmataPro-12"))
  ((member "Ubuntu Mono" (font-family-list))
-  (set-face-attribute 'default nil :font "Ubuntu Mono-11"))
+  (set-face-attribute 'default nil :font "Ubuntu Mono-12"))
  ((member "DejaVu Sans Mono" (font-family-list))
-  (set-face-attribute 'default nil :font "DejaVu Sans Mono-11")))
+  (set-face-attribute 'default nil :font "DejaVu Sans Mono-12")))
   #+END_SRC
 
   Note: To view all fonts that are available to use, run the following:
