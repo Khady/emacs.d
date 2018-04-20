@@ -807,10 +807,15 @@ rm ${ORG_DIR}/*.elc
    We don't need the tuareg package from the emacs repositories, it
    comes from opam.
 
+   The ~comment-continue~ variable is set so that multi lines comments
+   are not prefixed by ~*~. The length of ~comment-continue~ should be
+   the same as the length of ~comment-start~ to preserve indentation.
+
    #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :if opam-p
-  :mode ("\\.ml[ily]?$" . tuareg-mode))
+  :mode ("\\.ml[ily]?$" . tuareg-mode)
+  :hook (tuareg-mode . (lambda () (setq-local comment-continue "   "))))
    #+END_SRC
 
    When using ~reason-mode~, we want to load merlin from
