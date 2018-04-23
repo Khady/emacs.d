@@ -132,11 +132,28 @@
        (progn
          (louis--print-env-theme "id" env-theme-id)
          (gethash (string-to-number env-theme-id) themes-ids louis/bad-id-theme))
-       louis/default-theme
-       )))
+       louis/default-theme)))
   (disable-active-themes)
   (message "Loading theme `%s'..." selected-theme)
   (load-theme selected-theme t))
+   #+END_SRC
+
+** Solaire mode
+
+   =solaire-mode= is an aesthetic plugin that helps visually
+   distinguish file-visiting windows from other types of windows (like
+   popups or sidebars) by giving them a slightly different -- often
+   brighter -- background.
+
+   #+BEGIN_SRC emacs-lisp :tangle no
+(use-package solaire-mode
+  :ensure t
+  :hook
+  (after-change-major-mode-hook . #'turn-on-solaire-mode)
+  (after-revert-hook . #'turn-on-solaire-mode)
+  (minibuffer-setup-hook . #'solaire-mode-in-minibuffer)
+  :config
+  (solaire-mode-swap-bg))
    #+END_SRC
 
 * Font
@@ -640,7 +657,6 @@ rm ${ORG_DIR}/*.elc
    #+BEGIN_SRC emacs-lisp
 (add-to-list 'org-structure-template-alist
              '("b" "#+TITLE: ?
-,#+TITLE: ?
 ,#+DATE: ?
 ,#+DESCRIPTION: ?
 ,#+KEYWORDS: ?
