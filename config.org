@@ -21,6 +21,18 @@
 (load custom-file)
   #+END_SRC
 
+* Quelpa
+
+  Install packages from github or local files.
+
+  #+BEGIN_SRC emacs-lisp
+(use-package quelpa
+  :ensure t
+  :custom
+  (quelpa-update-melpa-p nil)
+  (quelpa-checkout-melpa-p nil))
+  #+END_SRC
+
 * Theme
 ** Doom themes
 
@@ -208,7 +220,6 @@
 ;; Turn off the blinking cursor
 (blink-cursor-mode -1)
 
-(setq-default indent-tabs-mode nil)
 (setq-default indicate-empty-lines t)
 
 ;; delete the region when typing, just like as we expect nowadays.
@@ -218,7 +229,6 @@
 
 (global-visual-line-mode)
 (diminish 'visual-line-mode)
-
 
 (setq uniquify-buffer-name-style 'forward)
 
@@ -231,7 +241,6 @@
 ;; Don't load old .elc files when the .el file is newer
 (setq load-prefer-newer t)
   #+END_SRC
-
 
 *** Backups
 
@@ -390,6 +399,11 @@
   #+END_SRC
 
 * Direnv
+
+  This direnv package works per file. It means that it will edit the
+  env each time the focus change from one file to another. Which also
+  mean that if a function like ~merlin-locate~ makes one jump into a
+  file not under a ~.envrc~ file the env will be lost in this file.
 
   #+BEGIN_SRC emacs-lisp :tangle no
 (use-package direnv
@@ -830,6 +844,8 @@ rm ${ORG_DIR}/*.elc
    #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :if opam-p
+  :bind (:map tuareg-mode-map
+              ("M-;" . comment-dwim))   ; restore default comment command
   :mode ("\\.ml[ily]?$" . tuareg-mode)
   :hook (tuareg-mode . (lambda () (setq-local comment-continue "   "))))
    #+END_SRC
@@ -879,6 +895,7 @@ rm ${ORG_DIR}/*.elc
 (use-package merlin
   :custom
   (merlin-completion-with-doc t)
+  (merlin-error-check-then-move nil)
   (merlin-command "ocamlmerlin")
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
@@ -891,6 +908,18 @@ rm ${ORG_DIR}/*.elc
   ;; Start merlin on ml files
   ((reason-mode tuareg-mode caml-mode) . merlin-mode))
    #+END_SRC
+
+*** eldoc
+
+    Enable automatic display of type and documentation of value at
+    point after a small delay. Provides a merlin backend to
+    ~eldoc-mode~. Works for OCaml and Reason.
+
+    #+BEGIN_SRC emacs-lisp
+(quelpa '(merlin-auto-hl :repo "Khady/merlin-eldoc" :fetcher github))
+(add-hook 'tuareg-mode-hook #'merlin-eldoc-setup)
+(add-hook 'reason-mode-hook #'merlin-eldoc-setup)
+    #+END_SRC
 
 *** utop
 
@@ -1051,6 +1080,13 @@ rm ${ORG_DIR}/*.elc
   :hook
   (emacs-lisp . elisp-def-mode)
   )
+   #+END_SRC
+
+   ~package-lint~ to check files that are emacs libraries
+
+   #+BEGIN_SRC emacs-lisp
+(use-package package-lint
+  :ensure t)
    #+END_SRC
 
 * Misc
