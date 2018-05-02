@@ -28,8 +28,6 @@
   Sources for this section include [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]], [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]].
 
   #+BEGIN_SRC emacs-lisp
-(setq gc-cons-threshold (* 100 1024 1024))
-
 ;; These functions are useful. Activate them.
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
@@ -202,7 +200,7 @@
 
    Use zenburn in terminal by default
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
 (use-package zenburn-theme
   :if (not window-system)
   :ensure t)
@@ -243,7 +241,7 @@
    Use environment variables to choose theme.
 
    #+BEGIN_SRC emacs-lisp
-(setq-local louis/default-theme (if (window-system) 'doom-molokai 'zenburn))
+(setq-local louis/default-theme (if (window-system) 'doom-molokai 'wombat))
 (setq-local louis/bad-id-theme 'whiteboard)
 
 (defun louis--print-env-theme (kind expected)
@@ -978,7 +976,7 @@ rm ${ORG_DIR}/*.elc
 
 ** Javascript
 
-   #+BEGIN_SRC emacs-lisp
+   #+BEGIN_SRC emacs-lisp :tangle no
 (use-package indium
   :ensure t)
    #+END_SRC
@@ -1496,7 +1494,7 @@ rm ${ORG_DIR}/*.elc
   Expand region increases the selected region by semantic units. Just
   keep pressing the key until it selects what you want.
 
-  #+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp :tangle no
 (use-package expand-region
   :ensure t
   :bind
@@ -1591,7 +1589,7 @@ rm ${ORG_DIR}/*.elc
   :ensure t)
   #+END_SRC
 
-  #+BEGIN_SRC emacs-lisp
+  #+BEGIN_SRC emacs-lisp :tangle no
 (use-package vline
   :ensure t)
   #+END_SRC
@@ -1934,6 +1932,24 @@ whether or not a region is selected."
  [(meta f11)] 'resize-window)
   #+END_SRC
 
+* Kill ring
+
+  Interactively explore the kill ring.
+
+  Display the kill ring in a small popup.
+
+  #+BEGIN_SRC emacs-lisp
+(use-package popup-kill-ring
+  :ensure t)
+  #+END_SRC
+
+  Display kill ring in another window and allow to search a pattern.
+
+  #+BEGIN_SRC emacs-lisp
+(use-package browse-kill-ring
+  :ensure t)
+  #+END_SRC
+
 * Key bindings
 
   #+BEGIN_SRC emacs-lisp
@@ -1944,3 +1960,4 @@ whether or not a region is selected."
 (bind-key "C-S-<iso-lefttab>" 'previous-buffer-same-mode)
 (bind-key "C-<tab>" 'next-buffer-same-mode)
   #+END_SRC
+
