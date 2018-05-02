@@ -21,6 +21,130 @@
 (load custom-file)
   #+END_SRC
 
+* Sane defaults
+
+  Let's start with some sane defaults, shall we?
+
+  Sources for this section include [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]], [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]].
+
+  #+BEGIN_SRC emacs-lisp
+(setq gc-cons-threshold (* 100 1024 1024))
+
+;; These functions are useful. Activate them.
+(put 'downcase-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;; Answering just 'y' or 'n' will do
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+;; UTF-8 please
+(setq locale-coding-system 'utf-8) ; pretty
+(set-terminal-coding-system 'utf-8) ; pretty
+(set-keyboard-coding-system 'utf-8) ; pretty
+(set-selection-coding-system 'utf-8) ; please
+(prefer-coding-system 'utf-8) ; with sugar on top
+
+(when (display-graphic-p)
+  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+
+;; no tabs
+(setq-default indent-tabs-mode nil)
+
+;; Turn off the blinking cursor
+(blink-cursor-mode -1)
+
+(setq-default indicate-empty-lines t)
+
+;; delete the region when typing, just like as we expect nowadays.
+(delete-selection-mode t)
+
+(column-number-mode t)
+
+(global-visual-line-mode)
+(diminish 'visual-line-mode)
+
+(setq uniquify-buffer-name-style 'forward)
+
+;; -i gets alias definitions from .bash_profile
+;; (setq shell-command-switch "-ic")
+
+;; Don't beep at me
+(setq visible-bell t)
+
+;; Don't load old .elc files when the .el file is newer
+(setq load-prefer-newer t)
+  #+END_SRC
+
+*** Backups
+
+    Keep all backup and auto-save files in one directory. Disk space
+    is cheap. Save lots.
+
+    #+BEGIN_SRC emacs-lisp
+(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
+
+(setq delete-old-versions -1)
+(setq version-control t)
+(setq vc-make-backup-files t)
+    #+END_SRC
+
+*** Saveplace
+
+    Save point position between sessions
+
+    #+BEGIN_SRC emacs-lisp
+(setq dotfiles-dir (file-name-directory
+                    (or (buffer-file-name) load-file-name)))
+(use-package saveplace
+  :custom
+  (save-place-file (expand-file-name ".places" dotfiles-dir))
+  (save-place t)
+  :config
+  (save-place-mode 1)
+  )
+    #+END_SRC
+
+*** Autorevert
+
+    Auto reload file when there is a change
+
+    #+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode t)
+(diminish 'auto-revert-mode)
+    #+END_SRC
+
+*** Compilation
+
+    #+BEGIN_SRC emacs-lisp
+;; (setq compilation-scroll-output t)
+(setq compilation-scroll-output 'first-error)
+    #+END_SRC
+
+*** Shell
+
+    Set shell to something not fancy. Not sure it works...
+
+    #+BEGIN_SRC emacs-lisp
+(setenv "SHELL" "/bin/bash")
+(setq-default explicit-shell-file-name "/bin/bash")
+(setq-default shell-file-name "/bin/bash")
+    #+END_SRC
+
+*** Interlock files
+
+    Interlock files are the ~.#*~ files created by emacs when a file
+    is edited and has not been saved yet. It is possible to disable
+    them using this snippet.
+
+    #+BEGIN_SRC emacs-lisp :tangle no
+(setq create-lockfiles nil)
+    #+END_SRC
+
+    See https://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
+
 * Quelpa
 
   Install packages from github or local files.
@@ -187,128 +311,6 @@
   #+BEGIN_SRC emacs-lisp :tangle no
 (font-family-list)
   #+END_SRC
-
-* Sane defaults
-
-  Let's start with some sane defaults, shall we?
-
-  Sources for this section include [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]], [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]].
-
-  #+BEGIN_SRC emacs-lisp
-;; These functions are useful. Activate them.
-(put 'downcase-region 'disabled nil)
-(put 'upcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
-(put 'dired-find-alternate-file 'disabled nil)
-
-;; Answering just 'y' or 'n' will do
-(defalias 'yes-or-no-p 'y-or-n-p)
-
-;; UTF-8 please
-(setq locale-coding-system 'utf-8) ; pretty
-(set-terminal-coding-system 'utf-8) ; pretty
-(set-keyboard-coding-system 'utf-8) ; pretty
-(set-selection-coding-system 'utf-8) ; please
-(prefer-coding-system 'utf-8) ; with sugar on top
-
-(when (display-graphic-p)
-  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
-
-;; no tabs
-(setq-default indent-tabs-mode nil)
-
-;; Turn off the blinking cursor
-(blink-cursor-mode -1)
-
-(setq-default indicate-empty-lines t)
-
-;; delete the region when typing, just like as we expect nowadays.
-(delete-selection-mode t)
-
-(column-number-mode t)
-
-(global-visual-line-mode)
-(diminish 'visual-line-mode)
-
-(setq uniquify-buffer-name-style 'forward)
-
-;; -i gets alias definitions from .bash_profile
-;; (setq shell-command-switch "-ic")
-
-;; Don't beep at me
-(setq visible-bell t)
-
-;; Don't load old .elc files when the .el file is newer
-(setq load-prefer-newer t)
-  #+END_SRC
-
-*** Backups
-
-    Keep all backup and auto-save files in one directory. Disk space
-    is cheap. Save lots.
-
-    #+BEGIN_SRC emacs-lisp
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
-
-(setq delete-old-versions -1)
-(setq version-control t)
-(setq vc-make-backup-files t)
-    #+END_SRC
-
-*** Saveplace
-
-    Save point position between sessions
-
-    #+BEGIN_SRC emacs-lisp
-(setq dotfiles-dir (file-name-directory
-                    (or (buffer-file-name) load-file-name)))
-(use-package saveplace
-  :custom
-  (save-place-file (expand-file-name ".places" dotfiles-dir))
-  (save-place t)
-  :config
-  (save-place-mode 1)
-  )
-    #+END_SRC
-
-*** Autorevert
-
-    Auto reload file when there is a change
-
-    #+BEGIN_SRC emacs-lisp
-(global-auto-revert-mode t)
-(diminish 'auto-revert-mode)
-    #+END_SRC
-
-*** Compilation
-
-    #+BEGIN_SRC emacs-lisp
-;; (setq compilation-scroll-output t)
-(setq compilation-scroll-output 'first-error)
-    #+END_SRC
-
-*** Shell
-
-    Set shell to something not fancy. Not sure it works...
-
-    #+BEGIN_SRC emacs-lisp
-(setenv "SHELL" "/bin/bash")
-(setq-default explicit-shell-file-name "/bin/bash")
-(setq-default shell-file-name "/bin/bash")
-    #+END_SRC
-
-*** Interlock files
-
-    Interlock files are the ~.#*~ files created by emacs when a file
-    is edited and has not been saved yet. It is possible to disable
-    them using this snippet.
-
-    #+BEGIN_SRC emacs-lisp :tangle no
-(setq create-lockfiles nil)
-    #+END_SRC
-
-    See https://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
 
 * Terminal
 
@@ -916,7 +918,7 @@ rm ${ORG_DIR}/*.elc
     ~eldoc-mode~. Works for OCaml and Reason.
 
     #+BEGIN_SRC emacs-lisp
-(quelpa '(merlin-auto-hl :repo "Khady/merlin-eldoc" :fetcher github))
+(quelpa '(merlin-eldoc :repo "Khady/merlin-eldoc" :fetcher github))
 (add-hook 'tuareg-mode-hook #'merlin-eldoc-setup)
 (add-hook 'reason-mode-hook #'merlin-eldoc-setup)
     #+END_SRC
@@ -1942,4 +1944,3 @@ whether or not a region is selected."
 (bind-key "C-S-<iso-lefttab>" 'previous-buffer-same-mode)
 (bind-key "C-<tab>" 'next-buffer-same-mode)
   #+END_SRC
-

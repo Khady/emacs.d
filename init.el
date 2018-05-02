@@ -1,4 +1,4 @@
-(setq gc-cons-threshold 400000000)
+(setq gc-cons-threshold (* 1024 1024 1024))
 
 ;;; Begin initialization
 ;; Turn off mouse interface early in startup to avoid momentary display
@@ -34,7 +34,16 @@
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)
 
+;; Use a hook so the message doesn't get clobbered by other messages.
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (message "Emacs ready in %s with %d garbage collections."
+                     (format "%.2f seconds"
+                             (float-time
+                              (time-subtract after-init-time before-init-time)))
+                     gcs-done)))
+
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "config.org"))
 
-(setq gc-cons-threshold 800000)
+(setq gc-cons-threshold (* 1 1024 1024))
