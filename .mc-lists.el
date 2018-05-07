@@ -10,10 +10,13 @@
         comment-dwim
         end-of-visual-line
         kill-region-or-word
+        org-beginning-of-line
         org-delete-char
         org-end-of-line
         org-self-insert-command
         org-yank
+        sp-backward-delete-char
+        sp-delete-char
         tuareg-comment-dwim
         tuareg-indent-phrase
         typescript-insert-and-indent

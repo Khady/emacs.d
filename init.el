@@ -25,8 +25,7 @@
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'diminish)
-  (package-install 'use-package)
-  )
+  (package-install 'use-package))
 
 ;; From use-package README
 (eval-when-compile

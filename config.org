@@ -6,28 +6,29 @@
 
 * Personal Information
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq user-full-name "Louis Roché"
       user-mail-address "louis@louisroche.net")
-  #+END_SRC
+#+END_SRC
 
 * Customize settings
 
-  Set up the customize file to its own separate file, instead of saving
-  customize settings in [[file:init.el][init.el]].
+Set up the customize file to its own separate file, instead of saving
+customize settings in [[file:init.el][init.el]].
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
-  #+END_SRC
+#+END_SRC
 
 * Sane defaults
 
-  Let's start with some sane defaults, shall we?
+Let's start with some sane defaults, shall we?
 
-  Sources for this section include [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]], [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]] and [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel Mai]].
+Sources for this section include [[https://github.com/magnars/.emacs.d/blob/master/settings/sane-defaults.el][Magnars Sveen]], [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua]], [[https://github.com/danielmai/.emacs.d/blob/master/config.org][Daniel
+Mai]] and [[https://github.com/technomancy/better-defaults][Better defaults]].
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ;; These functions are useful. Activate them.
 (put 'downcase-region 'disabled nil)
 (put 'upcase-region 'disabled nil)
@@ -73,27 +74,37 @@
 
 ;; Don't load old .elc files when the .el file is newer
 (setq load-prefer-newer t)
-  #+END_SRC
+
+(setq save-interprogram-paste-before-kill t)
+
+(global-set-key (kbd "M-z") 'zap-up-to-char)
+
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+
+(setq apropos-do-all t)
+
+(setq mouse-yank-at-point t)
+#+END_SRC
 
 *** Backups
 
-    Keep all backup and auto-save files in one directory. Disk space
-    is cheap. Save lots.
+Keep all backup and auto-save files in one directory. Disk space
+is cheap. Save lots.
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
 
 (setq delete-old-versions -1)
 (setq version-control t)
 (setq vc-make-backup-files t)
-    #+END_SRC
+#+END_SRC
 
 *** Saveplace
 
-    Save point position between sessions
+Save point position between sessions
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq dotfiles-dir (file-name-directory
                     (or (buffer-file-name) load-file-name)))
 (use-package saveplace
@@ -103,66 +114,86 @@
   :config
   (save-place-mode 1)
   )
-    #+END_SRC
+#+END_SRC
 
 *** Autorevert
 
-    Auto reload file when there is a change
+Auto reload file when there is a change
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (global-auto-revert-mode t)
 (diminish 'auto-revert-mode)
-    #+END_SRC
+#+END_SRC
 
 *** Compilation
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ;; (setq compilation-scroll-output t)
 (setq compilation-scroll-output 'first-error)
-    #+END_SRC
+#+END_SRC
 
 *** Shell
 
-    Set shell to something not fancy. Not sure it works...
+Set shell to something not fancy. Not sure it works...
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setenv "SHELL" "/bin/bash")
 (setq-default explicit-shell-file-name "/bin/bash")
 (setq-default shell-file-name "/bin/bash")
-    #+END_SRC
+#+END_SRC
 
 *** Interlock files
 
-    Interlock files are the ~.#*~ files created by emacs when a file
-    is edited and has not been saved yet. It is possible to disable
-    them using this snippet.
+Interlock files are the ~.#*~ files created by emacs when a file
+is edited and has not been saved yet. It is possible to disable
+them using this snippet.
 
-    #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (setq create-lockfiles nil)
-    #+END_SRC
+#+END_SRC
 
-    See https://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
+See https://www.gnu.org/software/emacs/manual/html_node/emacs/Interlocking.html
+
+*** Display Time
+
+When displaying the time with =display-time-mode=, I don't care about
+the load average.
+
+#+BEGIN_SRC emacs-lisp
+(setq display-time-default-load-average nil)
+#+END_SRC
+
+*** OS X scrolling
+
+#+BEGIN_SRC emacs-lisp
+(setq mouse-wheel-scroll-amount (quote (0.01)))
+#+END_SRC
 
 * Quelpa
 
-  Install packages from github or local files.
+Install packages from github or local files.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package quelpa
   :ensure t
   :custom
   (quelpa-update-melpa-p nil)
   (quelpa-checkout-melpa-p nil))
-  #+END_SRC
+
+(quelpa
+ '(quelpa-use-package
+   :fetcher github
+   :repo "quelpa/quelpa-use-package"))
+(require 'quelpa-use-package)
+#+END_SRC
 
 * Theme
 ** Doom themes
 
-   Theme of the [[https://github.com/hlissner/doom-emacs][doom emacs configuration]].
+Theme of the [[https://github.com/hlissner/doom-emacs][doom emacs configuration]].
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package doom-themes
-  :if (window-system)
   :ensure t
   :custom
   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
@@ -171,53 +202,53 @@
   (doom-themes-visual-bell-config) ; Enable flashing mode-line on errors
   (doom-themes-org-config)         ; Corrects (and improves) org-mode's native fontification.
   )
-   #+END_SRC
+#+END_SRC
 
 ** Solarized theme
 
-   Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
+Here's some configuration for [[https://github.com/bbatsov/solarized-emacs/][bbatsov's solarized themes]].
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package solarized-theme
   :defer 10
   :init
   (setq solarized-use-variable-pitch nil)
   :ensure t
   )
-   #+END_SRC
+#+END_SRC
 
 ** Monokai theme
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package monokai-theme
   :if (window-system)
   :ensure t
   :init
   (setq monokai-use-variable-pitch nil))
-   #+END_SRC
+#+END_SRC
 
 ** Zenburn theme
 
-   Use zenburn in terminal by default
+Use zenburn in terminal by default
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package zenburn-theme
   :if (not window-system)
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Zerodark theme
 
-   A dark theme for Emacs, inspired from Niflheim and One Dark
+A dark theme for Emacs, inspired from Niflheim and One Dark
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package zerodark-theme
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Convenient theme functions
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun switch-theme (theme)
   "Disables any currently active themes and loads THEME."
   ;; This interactive call is taken from `load-theme'
@@ -234,17 +265,17 @@
   "Disables any currently active themes listed in `custom-enabled-themes'."
   (interactive)
   (mapc #'disable-theme custom-enabled-themes))
-   #+END_SRC
+#+END_SRC
 
 ** Choose theme
 
-   Use environment variables to choose theme.
+Use environment variables to choose theme.
 
-   #+BEGIN_SRC emacs-lisp
-(setq-local louis/default-theme (if (window-system) 'doom-molokai 'wombat))
-(setq-local louis/bad-id-theme 'whiteboard)
+#+BEGIN_SRC emacs-lisp
+(setq-local my/default-theme 'doom-tomorrow-night)
+(setq-local my/bad-id-theme 'whiteboard)
 
-(defun louis--print-env-theme (kind expected)
+(defun my/print-env-theme (kind expected)
   (message "Looking for theme %s `%s' detected from the env..." kind expected))
 
 (let ((count-themes 1)
@@ -256,45 +287,54 @@
     (puthash count-themes theme themes-ids)
     (puthash (symbol-name theme) theme themes-names)
     (setq count-themes (+ 1 count-themes)))
-  (setq-local
-   selected-theme
-   (if env-theme-name
-       (progn
-         (louis--print-env-theme "name" env-theme-name)
-         (gethash env-theme-name themes-names louis/bad-id-theme))
-     (if env-theme-id
-       (progn
-         (louis--print-env-theme "id" env-theme-id)
-         (gethash (string-to-number env-theme-id) themes-ids louis/bad-id-theme))
-       louis/default-theme)))
-  (disable-active-themes)
-  (message "Loading theme `%s'..." selected-theme)
-  (load-theme selected-theme t))
-   #+END_SRC
+  (when (or my/default-theme env-theme-name env-theme-id)
+    (setq-local
+     selected-theme
+     (if env-theme-name
+         (progn
+           (my/print-env-theme "name" env-theme-name)
+           (gethash env-theme-name themes-names my/bad-id-theme))
+       (if env-theme-id
+           (progn
+             (my/print-env-theme "id" env-theme-id)
+             (gethash (string-to-number env-theme-id) themes-ids my/bad-id-theme))
+         my/default-theme)))
+    (disable-active-themes)
+    (message "Loading theme `%s'..." selected-theme)
+    (load-theme selected-theme t)))
+#+END_SRC
 
 ** Solaire mode
 
-   =solaire-mode= is an aesthetic plugin that helps visually
-   distinguish file-visiting windows from other types of windows (like
-   popups or sidebars) by giving them a slightly different -- often
-   brighter -- background.
+=solaire-mode= is an aesthetic plugin that helps visually
+distinguish file-visiting windows from other types of windows (like
+popups or sidebars) by giving them a slightly different -- often
+brighter -- background.
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package solaire-mode
   :ensure t
   :hook
-  (after-change-major-mode-hook . #'turn-on-solaire-mode)
-  (after-revert-hook . #'turn-on-solaire-mode)
-  (minibuffer-setup-hook . #'solaire-mode-in-minibuffer)
+  (after-change-major-mode-hook . turn-on-solaire-mode)
+  (after-revert-hook . turn-on-solaire-mode)
+  (minibuffer-setup-hook . solaire-mode-in-minibuffer)
   :config
   (solaire-mode-swap-bg))
-   #+END_SRC
+#+END_SRC
+
+** Auto dim other buffers
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package auto-dim-other-buffers
+  :ensure t
+  :config (auto-dim-other-buffers-mode t))
+#+END_SRC
 
 * Font
 
-  And here's how we tell Emacs to use the font we want to use.
+And here's how we tell Emacs to use the font we want to use.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (cond
  ((member "PragmataPro" (font-family-list))
   (set-face-attribute 'default nil :font "PragmataPro-12"))
@@ -302,29 +342,29 @@
   (set-face-attribute 'default nil :font "Ubuntu Mono-12"))
  ((member "DejaVu Sans Mono" (font-family-list))
   (set-face-attribute 'default nil :font "DejaVu Sans Mono-12")))
-  #+END_SRC
+#+END_SRC
 
-  Note: To view all fonts that are available to use, run the following:
+Note: To view all fonts that are available to use, run the following:
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (font-family-list)
-  #+END_SRC
+#+END_SRC
 
 * Terminal
 
-  Disable hl-line-mode when in a terminal.
+Disable hl-line-mode when in a terminal.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (add-hook 'after-change-major-mode-hook
           '(lambda () (hl-line-mode (if (equal major-mode 'term-mode) 0 1))))
-  #+END_SRC
+#+END_SRC
 
 * Mac customizations
 
-  There are configurations to make when running Emacs on macOS (hence the
-  "darwin" system-type check).
+There are configurations to make when running Emacs on macOS (hence the
+"darwin" system-type check).
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (when (string-equal system-type "darwin")
   ;; delete files by moving them to the trash
   (setq delete-by-moving-to-trash t)
@@ -365,86 +405,100 @@
   ;; Not going to use these commands
   (put 'ns-print-buffer 'disabled t)
   (put 'suspend-frame 'disabled t))
-  #+END_SRC
+#+END_SRC
 
-  ~exec-path-from-shell~ makes the command-line path with Emacs's shell
-  match the same one on macOS.
+~exec-path-from-shell~ makes the command-line path with Emacs's shell
+match the same one on macOS.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package exec-path-from-shell
   :if (memq window-system '(mac ns))
   :ensure t
   :init
   (exec-path-from-shell-initialize))
-  #+END_SRC
+#+END_SRC
 
 * List buffers
 
-  ibuffer is the improved version of list-buffers.
+ibuffer is the improved version of list-buffers.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ;; make ibuffer the default buffer lister.
 (defalias 'list-buffers 'ibuffer)
-  #+END_SRC
+#+END_SRC
 
 
-  source: http://ergoemacs.org/emacs/emacs_buffer_management.html
+source: http://ergoemacs.org/emacs/emacs_buffer_management.html
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 
 ;; Also auto refresh dired, but be quiet about it
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
-  #+END_SRC
+#+END_SRC
 
 * Direnv
 
-  This direnv package works per file. It means that it will edit the
-  env each time the focus change from one file to another. Which also
-  mean that if a function like ~merlin-locate~ makes one jump into a
-  file not under a ~.envrc~ file the env will be lost in this file.
+This direnv package works per file. It means that it will edit the
+env each time the focus change from one file to another. Which also
+mean that if a function like ~merlin-locate~ makes one jump into a
+file not under a ~.envrc~ file the env will be lost in this file.
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package direnv
   :ensure t
   :config
   (direnv-mode))
-  #+END_SRC
+#+END_SRC
 
 * Org mode
 ** Installation
 
-   Although Org mode ships with Emacs, the latest version can be installed externally. The configuration here follows the [[http://orgmode.org/elpa.html][Org mode ELPA installation instructions]].
+Although Org mode ships with Emacs, the latest version can be installed externally. The configuration here follows the [[http://orgmode.org/elpa.html][Org mode ELPA installation instructions]].
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package org
   :ensure org-plus-contrib
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
          ("C-c a" . org-agenda))
   )
-   #+END_SRC
+#+END_SRC
 
-   On Org mode version 9 I wasn't able to execute source blocks out of the box. [[https://emacs.stackexchange.com/a/28604][Others have ran into the same issue too]]. The solution is to remove the .elc files from the package directory:
+On Org mode version 9 I wasn't able to execute source blocks out of the box. [[https://emacs.stackexchange.com/a/28604][Others have ran into the same issue too]]. The solution is to remove the .elc files from the package directory:
 
-   #+BEGIN_SRC sh :var ORG_DIR=(let* ((org-v (cadr (split-string (org-version nil t) "@"))) (len (length org-v))) (substring org-v 1 (- len 2)))
+#+BEGIN_SRC sh :var ORG_DIR=(let* ((org-v (cadr (split-string (org-version nil t) "@"))) (len (length org-v))) (substring org-v 1 (- len 2)))
 rm ${ORG_DIR}/*.elc
-   #+END_SRC
+#+END_SRC
 
 ** Org extentions installation
 
-   =ob-http=: curl queries from org files.
+=ob-http=: curl queries from org files.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package ob-http
+  :ensure t)
+#+END_SRC
+
+=ob-restclient=: an alternative
+
+#+BEGIN_SRC emacs-lisp
+(use-package ob-restclient
+  :ensure t)
+#+END_SRC
+
+It comes with a completion backend for company
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package company-restclient
   :ensure t
-  )
-   #+END_SRC
+  :config (add-to-list 'company-backends 'company-restclient))
+#+END_SRC
 
-   =org-projectile=: org todo per project
+=org-projectile=: org todo per project
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package org-projectile
   :bind (("C-c n p" . org-projectile-project-todo-completing-read))
   :config
@@ -454,36 +508,35 @@ rm ${ORG_DIR}/*.elc
     (setq org-agenda-files (append org-agenda-files (org-projectile-todo-files)))
     (push (org-projectile-project-todo-entry) org-capture-templates))
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
-   Use =htmlize= to export org to html.
+Use =htmlize= to export org to html.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package htmlize
-  :ensure t
-  )
-   #+END_SRC
+  :ensure t)
+#+END_SRC
 
 ** Org agenda
 
-   Load all notes from the =~/Notes/*.org= files.
+Load all notes from the =~/Notes/*.org= files.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-agenda-files (file-expand-wildcards "~/Notes/*.org"))
-   #+END_SRC
+#+END_SRC
 
-   Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a6595450fcd0e787c/Sacha.org#org-agenda][this =delq= and =mapcar= trick from Sacha Chua's config]].
+Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a6595450fcd0e787c/Sacha.org#org-agenda][this =delq= and =mapcar= trick from Sacha Chua's config]].
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (setq org-agenda-files
       (delq nil
             (mapcar (lambda (x) (and (file-exists-p x) x))
                     '("~/Notes"))))
-   #+END_SRC
+#+END_SRC
 
-   Easy standup at work.
+Easy standup at work.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-enforce-todo-dependencies t)
 (setq org-log-done 'time)
 
@@ -518,11 +571,11 @@ rm ${ORG_DIR}/*.elc
           "|+@URGENT+TODO=\"TODO\""
           ))
         ))
-   #+END_SRC
+#+END_SRC
 
-   Some config
+Some config
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-refile-targets (quote (("ahrefs.org" :tag . "done")
                                  ("ahrefs.org" :regexp . "Tasks"))))
 (setq org-outline-path-complete-in-steps nil)         ; Refile in a single go
@@ -543,45 +596,49 @@ rm ${ORG_DIR}/*.elc
   "Put the agenda tags by the right border of the agenda window."
   (setq org-agenda-tags-column (- 4 (window-width)))
   (org-agenda-align-tags))
-   #+END_SRC
+#+END_SRC
 
 ** Org setup
 
-   Speed commands are a nice and quick way to perform certain actions
-   while at the beginning of a heading. It's not activated by default.
+Speed commands are a nice and quick way to perform certain actions
+while at the beginning of a heading. It's not activated by default.
 
-   See the doc for speed keys by checking out [[elisp:(info%20"(org)%20speed%20keys")][the documentation for
-   speed keys in Org mode]].
+See the doc for speed keys by checking out [[elisp:(info%20"(org)%20speed%20keys")][the documentation for
+speed keys in Org mode]].
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-use-speed-commands t)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-image-actual-width 550)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-highlight-latex-and-related '(latex script entities))
-   #+END_SRC
+#+END_SRC
 
-   Disable =validate= link at the end of html export
+Disable =validate= link at the end of html export
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-html-validation-link nil)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-startup-folded 'showeverything)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-html-htmlize-output-type 'css)
-   #+END_SRC
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(setq org-adapt-indentation nil)
+#+END_SRC
 
 ** Org babel languages
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((python . t)
@@ -596,13 +653,14 @@ rm ${ORG_DIR}/*.elc
    (sqlite . t)
    (js . t)
    (http . t)
-   ))
-   #+END_SRC
+   (restclient . t)
+   (elasticsearch . t)))
+#+END_SRC
 
-   It is possible to skip the confimation evaluation for a set of
-   languages. Not enabled.
+It is possible to skip the confimation evaluation for a set of
+languages. Not enabled.
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (defun my-org-confirm-babel-evaluate (lang body)
   "Do not confirm evaluation for these languages."
   (not (or (string= lang "C")
@@ -611,32 +669,32 @@ rm ${ORG_DIR}/*.elc
            (string= lang "emacs-lisp")
            (string= lang "sqlite"))))
 (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-   #+END_SRC
+#+END_SRC
 
 ** Org babel/source blocks
 
-   I like to have source blocks properly syntax highlighted and with the
-   editing popup window staying within the same window so all the windows
-   don't jump around. Also, having the top and bottom trailing lines in
-   the block is a waste of space, so we can remove them.
+I like to have source blocks properly syntax highlighted and with the
+editing popup window staying within the same window so all the windows
+don't jump around. Also, having the top and bottom trailing lines in
+the block is a waste of space, so we can remove them.
 
-   I noticed that fontification doesn't work with markdown mode when the
-   block is indented after editing it in the org src buffer---the leading
-   =#s= for headers don't get fontified properly because they appear as Org
-   comments. Setting ~org-src-preserve-indentation~ makes things
-   consistent as it doesn't pad source blocks with leading spaces.
+I noticed that fontification doesn't work with markdown mode when the
+block is indented after editing it in the org src buffer---the leading
+=#s= for headers don't get fontified properly because they appear as Org
+comments. Setting ~org-src-preserve-indentation~ makes things
+consistent as it doesn't pad source blocks with leading spaces.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-src-fontify-natively t
       org-src-window-setup 'current-window
       org-src-strip-leading-and-trailing-blank-lines t
       org-src-preserve-indentation t
       org-src-tab-acts-natively t)
-   #+END_SRC
+#+END_SRC
 
 ** Org publish
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq org-publish-project-alist
       '(("posts-org"
          :base-directory "~/Notes/posts"
@@ -666,9 +724,9 @@ rm ${ORG_DIR}/*.elc
          :recursive t
          :publishing-function org-publish-attachment)
         ("posts" :components ("posts-org" "posts-static"))))
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (add-to-list 'org-structure-template-alist
              '("b" "#+TITLE: ?
 ,#+DATE: ?
@@ -677,116 +735,68 @@ rm ${ORG_DIR}/*.elc
 ,#+LANGUAGE: en
 ,#+BEGIN_PREVIEW
 ,#+END_PREVIEW"))
-   #+END_SRC
+#+END_SRC
 
 * Tramp
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package tramp)
-  #+END_SRC
+#+END_SRC
 
-* Window
+* Eldoc
 
-  Convenient keybindings to resize windows.
+~eldoc-mode~ provides information about the symbol at point in the
+echo area. Usually it is the signature of a function.
 
-  #+BEGIN_SRC emacs-lisp
-(bind-key "s-C-<left>" 'shrink-window-horizontally)
-(bind-key "s-C-<right>" 'enlarge-window-horizontally)
-(bind-key "s-C-<down>" 'shrink-window)
-(bind-key "s-C-<up>" 'enlarge-window)
-(bind-key "M-<up>" 'windmove-up)
-(bind-key "M-<down>" 'windmove-down)
-(bind-key "M-<right>" 'windmove-right)
-(bind-key "M-<left>" 'windmove-left)
-  #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(use-package eldoc
+  :ensure t
+  :hook (eval-expression-minibuffer-setup-hook . eldoc-mode))
+#+END_SRC
 
-  It could be done like this too:
+Display eldoc message in an overlay instead of echo area.
 
-  #+BEGIN_SRC emacs-lisp :tangle no
-(windmove-default-keybindings "meta")
-  #+END_SRC
-
-
-  Whenever I split windows, I usually do so and also switch to the other
-  window as well, so might as well rebind the splitting key bindings to
-  do just that to reduce the repetition.
-
-  #+BEGIN_SRC emacs-lisp
-(defun vsplit-other-window ()
-  "Splits the window vertically and switches to that window."
-  (interactive)
-  (split-window-vertically)
-  (other-window 1 nil))
-(defun hsplit-other-window ()
-  "Splits the window horizontally and switches to that window."
-  (interactive)
-  (split-window-horizontally)
-  (other-window 1 nil))
-
-(bind-key "C-x 2" 'vsplit-other-window)
-(bind-key "C-x 3" 'hsplit-other-window)
-  #+END_SRC
-
-** Dedicated window
-
-   #+BEGIN_SRC emacs-lisp
-;; https://stackoverflow.com/questions/5151620/how-do-i-make-this-emacs-frame-keep-its-buffer-and-not-get-resized
-;; Toggle window dedication
-(defun toggle-window-dedicated ()
-  "Toggle whether the current active window is dedicated or not"
-  (interactive)
-  (message
-   (if (let (window (get-buffer-window (current-buffer)))
-         (set-window-dedicated-p window
-                                 (not (window-dedicated-p window))))
-       "Window '%s' is dedicated"
-     "Window '%s' is normal")
-   (current-buffer)))
-
-(define-minor-mode sticky-buffer-mode
-  "Make the current window always display this buffer."
-  nil " sticky" nil
-  (set-window-dedicated-p (selected-window) sticky-buffer-mode))
-
-(bind-key "C-c C-'" 'toggle-window-dedicated)
-   #+END_SRC
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package eldoc-overlay
+  :ensure t)
+#+END_SRC
 
 * Completion
 ** Company
 
-   I use company mode as a completion backend
+I use company mode as a completion backend
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package company
   :ensure t
   :custom
   (company-quickhelp-delay 0)
+  (company-idle-delay nil)
   (company-tooltip-align-annotations t)
   :hook
   ((prog-mode utop-mode) . company-mode)
   :config
   (company-quickhelp-mode 1)
   :bind
-  ("M-o" . company-complete)
-  )
-   #+END_SRC
+  ("M-o" . company-complete))
+#+END_SRC
 
-   Popup for documentation or help
+Popup for documentation or help
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package company-quickhelp
   :ensure t
   :bind (:map company-active-map
               ("M-h" . company-quickhelp-manual-begin))
   )
-   #+END_SRC
+#+END_SRC
 
 * Languages
 ** Ocaml/Reason
 *** Utils
-   Util function to select where to load merlin from.
+Util function to select where to load merlin from.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun shell-cmd (cmd)
   "Returns the stdout output of a shell command or nil if the command returned
      an error"
@@ -803,127 +813,92 @@ rm ${ORG_DIR}/*.elc
   (reason-cmd-where "ocamlmerlin ----where"))
 (defun refmt-where ()
   (reason-cmd-where "refmt ----where"))
-   #+END_SRC
+#+END_SRC
 
 *** Load opam
 
-   Setup environment variables using opam. To be used if the env is
-   not configured before to launch emacs.
+Setup environment variables using opam. To be used if the env is
+not configured before to launch emacs.
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (if opam-p
     (dolist (var (car (read-from-string (shell-command-to-string "opam config env --sexp"))))
       (setenv (car var) (cadr var))))
-   #+END_SRC
+#+END_SRC
 
-   Add opam libs.
+Add opam libs.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (if opam-p
     (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
       (when (and opam-share (file-directory-p opam-share))
         (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
-   #+END_SRC
-
-*** caml, reasonml and tuareg modes
-
-   ~caml~ is required because ~caml-types-expr-face~ is used by merlin.
-
-   #+BEGIN_SRC emacs-lisp
-(use-package caml
-  :ensure t)
-   #+END_SRC
-
-   We don't need the tuareg package from the emacs repositories, it
-   comes from opam.
-
-   The ~comment-continue~ variable is set so that multi lines comments
-   are not prefixed by ~*~. The length of ~comment-continue~ should be
-   the same as the length of ~comment-start~ to preserve indentation.
-
-   #+BEGIN_SRC emacs-lisp
-(use-package tuareg
-  :if opam-p
-  :bind (:map tuareg-mode-map
-              ("M-;" . comment-dwim))   ; restore default comment command
-  :mode ("\\.ml[ily]?$" . tuareg-mode)
-  :hook (tuareg-mode . (lambda () (setq-local comment-continue "   "))))
-   #+END_SRC
-
-   When using ~reason-mode~, we want to load merlin from
-   ~node_modules~ if it is available there. Otherwise it will come
-   from opam.
-
-   #+BEGIN_SRC emacs-lisp
-(use-package reason-mode
-  :if reason-p
-  :ensure t
-  :bind (:map reason-mode-map
-              ("C-M-\\" . refmt))
-  :custom (refmt-width-mode 'fill)
-  :config
-  (defun set-reason-fill-column ()
-    (set-fill-column 100))
-  (let* ((refmt-reason (refmt-where))
-         (merlin-reason (ocamlmerlin-where))
-         (reason-base-dir (when merlin-reason
-                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
-    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
-    (when reason-base-dir
-      (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
-      (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
-    (when refmt-reason
-      (setq refmt-command refmt-reason)))
-  :hook (reason-mode . set-reason-fill-column))
-   #+END_SRC
-
-*** ocp tools
-
-   Require ocp stuff first because of conflicts between shortcuts.
-   It is installed from opam, ~ensure~ is not required.
-
-   #+BEGIN_SRC emacs-lisp
-(use-package ocp-indent :if (shell-cmd "which ocp-indent"))
-(use-package ocp-index :if (shell-cmd "which ocp-index"))
-   #+END_SRC
+#+END_SRC
 
 *** merlin
 
-   Configure merlin. Magical autocompletion and IDE features.
+Configure merlin. Magical autocompletion and IDE features.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package merlin
   :custom
   (merlin-completion-with-doc t)
   (merlin-error-check-then-move nil)
   (merlin-command "ocamlmerlin")
+  :custom-face
+  (merlin-type-face ((t (:background "dim gray"))))
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
               ("M-?" . merlin-occurrences)
               ("C-c C-j" . merlin-jump)
               ("C-c i" . merlin-locate-ident)
-              ("C-c C-e" . merlin-iedit-occurrences))
+              ("C-c C-e" . merlin-iedit-occurrences)
+              ("C-c d" . merlin-document))
   :hook
   ;; Start merlin on ml files
-  ((reason-mode tuareg-mode caml-mode) . merlin-mode))
-   #+END_SRC
+  ((reason-mode tuareg-mode) . merlin-mode))
+#+END_SRC
 
 *** eldoc
 
-    Enable automatic display of type and documentation of value at
-    point after a small delay. Provides a merlin backend to
-    ~eldoc-mode~. Works for OCaml and Reason.
+Enable automatic display of type and documentation of value at
+point after a small delay. Provides a merlin backend to
+~eldoc-mode~. Works for OCaml and Reason.
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (quelpa '(merlin-eldoc :repo "Khady/merlin-eldoc" :fetcher github))
 (add-hook 'tuareg-mode-hook #'merlin-eldoc-setup)
 (add-hook 'reason-mode-hook #'merlin-eldoc-setup)
-    #+END_SRC
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package merlin-eldoc
+  :after merlin
+  :load-path "~/Code/github/merlin-eldoc"
+  :custom
+  (eldoc-echo-area-use-multiline-p t)
+  (merlin-eldoc-max-lines 8)
+  (merlin-eldoc-max-lines-function-arguments 1)
+  (merlin-eldoc-type-verbosity 'min)
+  (merlin-eldoc-function-arguments nil)
+  (merlin-eldoc-doc nil)
+  :hook ((tuareg-mode reason-mode) . merlin-eldoc-setup))
+#+END_SRC
+
+*** ocp tools
+
+Require ocp stuff first because of conflicts between shortcuts.
+It is installed from opam, ~ensure~ is not required.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ocp-indent :if (shell-cmd "which ocp-indent"))
+(use-package ocp-index :if (shell-cmd "which ocp-index"))
+#+END_SRC
 
 *** utop
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package utop
   :custom
   (utop-edit-command nil)
@@ -944,11 +919,86 @@ rm ${ORG_DIR}/*.elc
                              (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
                              prompt)))
                    (utop-minor-mode))))
-   #+END_SRC
+#+END_SRC
+
+*** caml, reasonml and tuareg modes
+
+If no face is setup for ~merlin-type-face~, ~caml~ is required because
+it will be set to ~caml-types-expr-face~.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package caml
+  :ensure t)
+#+END_SRC
+
+We don't need the tuareg package from the emacs repositories, it
+comes from opam.
+
+The ~comment-continue~ variable is set so that multi lines comments
+are not prefixed by ~*~. The length of ~comment-continue~ should be
+the same as the length of ~comment-start~ to preserve indentation.
+
+#+BEGIN_SRC emacs-lisp
+(use-package tuareg
+  :if opam-p
+  :bind (:map tuareg-mode-map
+              ("M-;" . comment-dwim))   ; restore default comment command
+  :mode ("\\.ml[ily]?$" . tuareg-mode)
+  :hook (tuareg-mode . (lambda () (setq-local comment-continue "  ")))) ; TODO: should it be in custom instead?
+#+END_SRC
+
+When using ~reason-mode~, we want to load merlin from
+~node_modules~ if it is available there. Otherwise it will come
+from opam.
+
+#+BEGIN_SRC emacs-lisp
+(use-package reason-mode
+  :if reason-p
+  :ensure t
+  :bind (:map reason-mode-map
+              ("C-M-\\" . refmt))
+  :custom (refmt-width-mode 'fill)
+  :config
+  (defun set-reason-fill-column ()
+    (set-fill-column 100))
+  (let* ((refmt-reason (refmt-where))
+         (merlin-reason (ocamlmerlin-where))
+         (reason-base-dir (when merlin-reason
+                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
+    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
+    (when reason-base-dir
+      (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
+      (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
+    (when refmt-reason
+      (setq refmt-command refmt-reason)))
+  :hook (reason-mode . set-reason-fill-column))
+#+END_SRC
+
+*** lsp
+
+It is possible to use the ~ocaml-language-server~, which is a lsp
+server for ocaml and reason, rather than calling merlin directly. It
+also comes with some nice UI if ~lsp-ui~ is installed.
+
+I find it not as complete or neat than using merlin + merlin-eldoc for
+now, so this is not enabled by default.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package lsp-ocaml
+  :ensure t
+  :hook (tuareg-mode . lsp-ocaml-enable))
+#+END_SRC
+
+~ocaml-language-server~ has to be in the path. It can be installed
+with yarn global. It will be in ~yarn global bin~.
+
+#+BEGIN_SRC fish
+yarn global add ocaml-language-server
+#+END_SRC
 
 ** Typescript
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package tide
   :ensure t
   :bind (:map tide-mode-map
@@ -972,201 +1022,178 @@ rm ${ORG_DIR}/*.elc
   (add-hook 'typescript-mode-hook #'setup-tide-mode)
   (add-hook 'js2-mode-hook #'setup-tide-mode)
   )
-   #+END_SRC
+#+END_SRC
 
 ** Javascript
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package indium
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package js2-mode
   :ensure t
   :mode "\\.js\\'"
   :custom
   (js-indent-level 2)
   )
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package web-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Json
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package json-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package json-reformat
   :ensure t
   :custom
   (json-reformat:indent-width 1)
   )
-   #+END_SRC
+#+END_SRC
 
-   Based on [[https://emacs.cafe/emacs/guest-post/2017/06/26/hierarchy.html][hierarchy.el]]:
+Based on [[https://emacs.cafe/emacs/guest-post/2017/06/26/hierarchy.html][hierarchy.el]]:
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package tree-mode
   :ensure t)
 
 (use-package json-navigator
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Python
 
-   Python has a big jedi package to have completion and many other nice things.
+Python has a big jedi package to have completion and many other nice things.
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package jedi
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Rust
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package rust-mode
   :ensure t
   :defer t)
-   #+END_SRC
+#+END_SRC
 
 ** Markdown
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Protobuf
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package protobuf-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Puppet
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package puppet-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Yaml
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package yaml-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Nginx
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package nginx-mode
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
 ** Lisp
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package elisp-def
   :ensure t
   :hook
-  (emacs-lisp . elisp-def-mode)
-  )
-   #+END_SRC
+  (emacs-lisp . elisp-def-mode))
+#+END_SRC
 
-   ~package-lint~ to check files that are emacs libraries
+~package-lint~ to check files that are emacs libraries
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package package-lint
   :ensure t)
-   #+END_SRC
+#+END_SRC
 
-* Misc
+** Fish
 
-*** Display Time
+I use fish as a shell
 
-    When displaying the time with =display-time-mode=, I don't care about
-    the load average.
+#+BEGIN_SRC emacs-lisp
+(use-package fish-completion
+  :ensure t
+  :config (when (and (executable-find "fish")
+                     (require 'fish-completion nil t))
+            (global-fish-completion-mode)))
+#+END_SRC
 
-    #+BEGIN_SRC emacs-lisp
-(setq display-time-default-load-average nil)
-    #+END_SRC
-
-*** OS X scrolling
-
-    #+BEGIN_SRC emacs-lisp
-(setq mouse-wheel-scroll-amount (quote (0.01)))
-    #+END_SRC
-
-* Emacsclient
-
-  #+BEGIN_SRC emacs-lisp :tangle no
-(use-package server
-  :config
-  (server-start))
-  #+END_SRC
+#+BEGIN_SRC emacs-lisp
+(use-package fish-mode
+  :ensure t)
+#+END_SRC
 
 * Parentheses
 
-  Rainbow delimiters, to have a different color for each level of
-  =([{=.
+Rainbow delimiters, to have a different color for each level of
+=([{=.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
   :ensure t
-  :hook (prog-mode . rainbow-delimiters-mode)
-  )
-  #+END_SRC
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+END_SRC
 
-  Match paren
+Smartparens aims to be a replacement for electric-pair-mode, paren,
+autopair, paredit and other modes dedicated to balancing of
+delimiters. It is supposed to be more powerful and work in every mode.
 
-  #+BEGIN_SRC emacs-lisp
-(use-package paren
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
   :ensure t
-  :custom
-  (show-paren-delay 0)
-  (blink-matching-paren t)
-  (blink-matching-paren-on-screen t)
-  (show-paren-style 'expression)
-  (blink-matching-paren-dont-ignore-comments t)
-  :init
-  (defun goto-match-paren (arg)
-    (interactive "p")
-    (cond ((looking-at "\\s\(") (forward-list 1) (backward-char
-                                                  1))
-          ((looking-at "\\s\)") (forward-char 1)
-           (backward-list 1))
-          (t (self-insert-command (or arg 1)))))
   :config
-  (show-paren-mode t)
-  :bind ("M-%" . goto-match-paren)
-  )
-  #+END_SRC
-
-  Autopair
-
-  #+BEGIN_SRC emacs-lisp
-(use-package autopair
-  :ensure t
-  :diminish
-  :config
-  (autopair-global-mode)                ; to enable in all buffers
+  (defun my/enable-smartparens-prog ()
+    "Enable all smartparens mode + keymap."
+    (interactive)
+    (smartparens-mode)
+    (smartparens-strict-mode)
+    (show-smartparens-mode)
+    (sp-use-smartparens-bindings)
+    (require 'smartparens-config))
+  (defun my/enable-smartparens-text ()
+    (interactive)
+    (smartparens-mode)
+    (show-smartparens-mode))
   :hook
-  (term-mode . (lambda () (autopair-mode -1)))
-  )
-  #+END_SRC
+  (prog-mode . my/enable-smartparens-prog)
+  (text-mode . my/enable-smartparens-text))
+#+END_SRC
 
 * Whitespace
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package whitespace
   :ensure t
   :diminish global-whitespace-mode
@@ -1176,90 +1203,66 @@ rm ${ORG_DIR}/*.elc
   :config
   (global-whitespace-mode t)
   )
-  #+END_SRC
+#+END_SRC
 
 * Editorconfig
 
-  Same indentation rules everywhere.
+Same indentation rules everywhere.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package editorconfig
   :diminish
   :ensure t
-  :config
-  (progn (editorconfig-mode t))
-  )
-  #+END_SRC
+  :config (editorconfig-mode t))
+#+END_SRC
 
 * Indentation
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package aggressive-indent
   :ensure t
   :config
   (global-aggressive-indent-mode 1)
   (dolist (mode '(tuareg-mode reason-mode))
-    (add-to-list 'aggressive-indent-excluded-modes mode))
-  )
-  #+END_SRC
+    (add-to-list 'aggressive-indent-excluded-modes mode)))
+#+END_SRC
 
 * Evil
 
-  I will use it, one day... For now it is used to jump from opening
-  to closing keywords in ocaml.
+I will use it, one day... For now it is used to jump from opening
+to closing keywords in ocaml.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package evil
   :ensure t
   :bind
   ("C-%" . evilmi-jump-items)
   )
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package evil-matchit
   :ensure t
   :config
   (global-evil-matchit-mode 1)
   )
-  #+END_SRC
-
-* Fish
-
-  I use fish as a shell
-
-  #+BEGIN_SRC emacs-lisp
-(use-package fish-completion
-  :ensure t
-  :config
-  (progn
-    (when (and (executable-find "fish")
-               (require 'fish-completion nil t))
-      (global-fish-completion-mode))
-    )
-  )
-  #+END_SRC
-
-  #+BEGIN_SRC emacs-lisp
-(use-package fish-mode
-  :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Git
 
-  Number of columns in a git commit message
+Number of columns in a git commit message
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq git-commit-summary-max-length 72)
-  #+END_SRC
+#+END_SRC
 
 ** Magit
 
-   A great interface for git projects. It's much more pleasant to use
-   than the git interface on the command line. Use an easy keybinding to
-   access magit.
+A great interface for git projects. It's much more pleasant to use
+than the git interface on the command line. Use an easy keybinding to
+access magit.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package magit
   :ensure t
   :bind
@@ -1268,19 +1271,19 @@ rm ${ORG_DIR}/*.elc
          ("q" . magit-quit-session))
    )
   )
-   #+END_SRC
+#+END_SRC
 
 ** Fullscreen magit
 
-   #+BEGIN_QUOTE
-   The following code makes magit-status run alone in the frame, and then
-   restores the old window configuration when you quit out of magit.
+#+BEGIN_QUOTE
+The following code makes magit-status run alone in the frame, and then
+restores the old window configuration when you quit out of magit.
 
-   No more juggling windows after commiting. It's magit bliss.
-   #+END_QUOTE
-   [[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
+No more juggling windows after commiting. It's magit bliss.
+#+END_QUOTE
+[[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 ;; full screen magit-status
 (defadvice magit-status (around magit-fullscreen activate)
   (window-configuration-to-register :magit-fullscreen)
@@ -1292,14 +1295,14 @@ rm ${ORG_DIR}/*.elc
   (interactive)
   (kill-buffer)
   (jump-to-register :magit-fullscreen))
-   #+END_SRC
+#+END_SRC
 
 ** Git gutter
 
-   ~git-gutter~ is explicitely installed because it can't be diminished
-   from ~git-gutter-fringe~.
+~git-gutter~ is explicitely installed because it can't be diminished
+from ~git-gutter-fringe~.
 
-   #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package git-gutter
   :ensure t
   :diminish
@@ -1315,12 +1318,12 @@ rm ${ORG_DIR}/*.elc
   (set-face-foreground 'git-gutter-fr:deleted  "white")
   (global-git-gutter-mode)
   )
-   #+END_SRC
+#+END_SRC
 
 ** Github
 *** git-link
 
-    #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package git-link
   :ensure t
   :custom
@@ -1329,13 +1332,13 @@ rm ${ORG_DIR}/*.elc
   (add-to-list 'git-link-remote-alist
                '("git\\.ahrefs\\.com" git-link-github))
   )
-    #+END_SRC
+#+END_SRC
 
 *** Handmade
 
-    Doesn't handle region properly
+Doesn't handle region properly
 
-   #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package seq)
 (use-package simple)
 
@@ -1394,26 +1397,26 @@ rm ${ORG_DIR}/*.elc
 
   (interactive)
   (kill-new (make-github-url)))
-   #+END_SRC
+#+END_SRC
 
 * Mercurial
 ** Monky
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package monky
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 ** ahg
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package ahg
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Helm
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
   :diminish helm-mode
@@ -1432,17 +1435,17 @@ rm ${ORG_DIR}/*.elc
          ("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x C-f" . helm-find-files)))
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
   :ensure t
   :config
   (helm-projectile-on)
   )
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package helm-swoop
   :ensure t
   :bind
@@ -1450,21 +1453,21 @@ rm ${ORG_DIR}/*.elc
   ("M-i" . helm-multi-swoop-projectile)
   ("M-I" . helm-swoop-back-to-last-point)
   )
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-ag
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package org-projectile-helm
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Projectile
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package projectile
   :ensure t
   :custom
@@ -1475,51 +1478,51 @@ rm ${ORG_DIR}/*.elc
   (projectile-global-mode)
   (helm-projectile-on)
   )
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package projectile-ripgrep
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Iedit
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package iedit
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Expand region
 
-  Expand region increases the selected region by semantic units. Just
-  keep pressing the key until it selects what you want.
+Expand region increases the selected region by semantic units. Just
+keep pressing the key until it selects what you want.
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package expand-region
   :ensure t
   :bind
   ("C-=" . 'er/expand-region)
   )
-  #+END_SRC
+#+END_SRC
 
 * Multiple cursors
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
   :ensure t
   :bind
   ("C-<" . mc/mark-previous-like-this)
   ("C->" . mc/mark-next-like-this)
   )
-  #+END_SRC
+#+END_SRC
 
-* linum
+* Linum
 
-  It's seems to be a challenge to display line numbers. For
-  performances reasons, people say to use ~nlinum~. But I can't do
-  customization as with the normal linum mode.
+It's seems to be a challenge to display line numbers. For
+performances reasons, people say to use ~nlinum~. But I can't do
+customization as with the normal linum mode.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package linum
   :custom
   (linum-format " %2d") ; numbers in the line gutter don't touch the left
@@ -1545,84 +1548,91 @@ rm ${ORG_DIR}/*.elc
       (linum-mode 1)))
   )
 
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package nlinum
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package nlinum-relative
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Regexp
 
-  I never took time to really use this...
+I never took time to really use this...
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package visual-regexp
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package visual-regexp-steroids
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Undo Tree
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :ensure t
   :diminish
   :config
   (global-undo-tree-mode)
   )
-  #+END_SRC
+#+END_SRC
 
 * Big files/lines
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package vlf
   :ensure t)
-  #+END_SRC
-
-  #+BEGIN_SRC emacs-lisp :tangle no
-(use-package vline
-  :ensure t)
-  #+END_SRC
+#+END_SRC
 
 * Restclient
 
-  See [[http://emacsrocks.com/e15.html][Emacs Rocks! Episode 15]] to learn how restclient can help out with
-  testing APIs from within Emacs. The HTTP calls you make in the buffer
-  aren't constrainted within Emacs; there's the
-  =restclient-copy-curl-command= to get the equivalent =curl= call
-  string to keep things portable.
+See [[http://emacsrocks.com/e15.html][Emacs Rocks! Episode 15]] to learn how restclient can help out with
+testing APIs from within Emacs. The HTTP calls you make in the buffer
+aren't constrainted within Emacs; there's the
+=restclient-copy-curl-command= to get the equivalent =curl= call
+string to keep things portable.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package restclient
   :ensure t
   :mode ("\\.restclient\\'" . restclient-mode))
-  #+END_SRC
+#+END_SRC
+
+* Elasticsearch
+
+It is convenient to be able to query elasticsearch from emacs. It can
+be done from restclient or ob-html. But ~es-mode~ comes with some nice
+things like tables when using ~ob-elasticsearch~.
+
+#+BEGIN_SRC emacs-lisp
+(use-package es-mode
+  :ensure t)
+#+END_SRC
 
 * Scratch
 
-  Convenient package to create =*scratch*= buffers that are based on the
-  current buffer's major mode. This is more convienent than manually
-  creating a buffer to do some scratch work or reusing the initial
-  =*scratch*= buffer.
+Convenient package to create =*scratch*= buffers that are based on the
+current buffer's major mode. This is more convienent than manually
+creating a buffer to do some scratch work or reusing the initial
+=*scratch*= buffer.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package scratch
   :ensure t
   :commands scratch)
-  #+END_SRC
-* Flymode/Flymake
+#+END_SRC
 
-  #+BEGIN_SRC emacs-lisp
+* Flymake
+
+#+BEGIN_SRC emacs-lisp
 (defun next-flymake-error ()
   (interactive)
   (let ((err-buf nil))
@@ -1643,19 +1653,18 @@ rm ${ORG_DIR}/*.elc
   ("C-c <f8>" . flymake-mode)
   ("C-c <f7>" . next-flymake-error)
   ("C-c <f6>"  . flymake-goto-next-error)
-  ("<f7>" . next-error)
-  )
-  #+END_SRC
+  ("<f7>" . next-error))
+#+END_SRC
 
 * GDB
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (setq-default gdb-many-windows t)
-  #+END_SRC
+#+END_SRC
 
 * Utils
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun close-all-buffers ()
   (interactive)
   (mapc 'kill-buffer (buffer-list)))
@@ -1930,34 +1939,166 @@ whether or not a region is selected."
 
 (global-set-key
  [(meta f11)] 'resize-window)
-  #+END_SRC
+#+END_SRC
 
 * Kill ring
 
-  Interactively explore the kill ring.
+Interactively explore the kill ring.
 
-  Display the kill ring in a small popup.
+Display the kill ring in a small popup.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package popup-kill-ring
   :ensure t)
-  #+END_SRC
+#+END_SRC
 
-  Display kill ring in another window and allow to search a pattern.
+Display kill ring in another window and allow to search a pattern.
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (use-package browse-kill-ring
   :ensure t)
-  #+END_SRC
+#+END_SRC
+
+* Screencast
+
+Sometimes it is convenient to record a video of emacs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package camcorder
+  :ensure t)
+#+END_SRC
+
+* Emacsclient
+
+I want to be able to have multiple instances of emacs server running
+at the same time.
+
+To launch emacs client and specify the server name:
+~emacsclient -s $EMACS_SERVER_NAME -c -n -a "" $@~.
+
+#+BEGIN_SRC emacs-lisp
+(use-package server
+  :config
+  (let ((env-server-name (getenv "EMACS_SERVER_NAME")))
+    (when env-server-name
+      (message "Replacing original server name %s with %s...done"
+               server-name env-server-name)
+      (setq server-name env-server-name)))
+  (server-start))
+#+END_SRC
+
+I always forget which server is in use.
+
+#+BEGIN_SRC emacs-lisp
+(defun server-name ()
+  "Display the name of the server"
+  (interactive)
+  (message "%s" server-name))
+#+END_SRC
 
 * Key bindings
 
-  #+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :ensure t
+  :diminish
+  :config
+  (which-key-mode))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 (bind-key "C-c j" 'replace-string)
 (bind-key "C-c x" 'close-all-buffers)
 (bind-key "C-c k" 'kill-this-buffer)
 
 (bind-key "C-S-<iso-lefttab>" 'previous-buffer-same-mode)
 (bind-key "C-<tab>" 'next-buffer-same-mode)
-  #+END_SRC
+#+END_SRC
+
+Convenient keybindings to resize windows.
+
+#+BEGIN_SRC emacs-lisp
+(bind-key "M-S-C-<left>" 'shrink-window-horizontally)
+(bind-key "M-S-C-<right>" 'enlarge-window-horizontally)
+(bind-key "M-S-C-<down>" 'shrink-window)
+(bind-key "M-S-C-<up>" 'enlarge-window)
+#+END_SRC
+
+Bind arrow keys to move between windows:
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(bind-key "M-<up>" 'windmove-up)
+(bind-key "M-<down>" 'windmove-down)
+(bind-key "M-<right>" 'windmove-right)
+(bind-key "M-<left>" 'windmove-left)
+#+END_SRC
+
+It could be done like this too:
+
+#+BEGIN_SRC emacs-lisp
+(use-package windmove
+  :config
+  (windmove-default-keybindings 'ctrl))
+#+END_SRC
+
+Combine windmove with framemove
+
+#+BEGIN_SRC emacs-lisp
+(use-package framemove
+  :quelpa ((framemove :fetcher github :repo "emacsmirror/framemove"))
+  :custom (framemove-hook-into-windmove t))
+#+END_SRC
+
+
+Whenever I split windows, I usually do so and also switch to the other
+window as well, so might as well rebind the splitting key bindings to
+do just that to reduce the repetition.
+
+#+BEGIN_SRC emacs-lisp
+(defun vsplit-other-window ()
+  "Splits the window vertically and switches to that window."
+  (interactive)
+  (split-window-vertically)
+  (other-window 1 nil))
+(defun hsplit-other-window ()
+  "Splits the window horizontally and switches to that window."
+  (interactive)
+  (split-window-horizontally)
+  (other-window 1 nil))
+
+(bind-key "C-x 2" 'vsplit-other-window)
+(bind-key "C-x 3" 'hsplit-other-window)
+#+END_SRC
+
+Dedicated windows.
+
+#+BEGIN_SRC emacs-lisp
+;; https://stackoverflow.com/questions/5151620/how-do-i-make-this-emacs-frame-keep-its-buffer-and-not-get-resized
+;; Toggle window dedication
+(defun toggle-window-dedicated ()
+  "Toggle whether the current active window is dedicated or not"
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window
+                                 (not (window-dedicated-p window))))
+       "Window '%s' is dedicated"
+     "Window '%s' is normal")
+   (current-buffer)))
+
+(define-minor-mode sticky-buffer-mode
+  "Make the current window always display this buffer."
+  nil " sticky" nil
+  (set-window-dedicated-p (selected-window) sticky-buffer-mode))
+
+(bind-key "C-c C-'" 'toggle-window-dedicated)
+#+END_SRC
+* Todolist
+- winner mode
+- full frame mode
+- annoying arrows https://github.com/magnars/annoying-arrows-mode.el
+- visual regexp https://github.com/benma/visual-regexp-steroids.el/
+- whole line or region https://github.com/purcell/whole-line-or-region
+- realgud debugger https://github.com/realgud/realgud
+- devdocs lookup https://github.com/skeeto/devdocs-lookup (doesn't work for ocaml)
 
