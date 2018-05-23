@@ -762,7 +762,6 @@ Display eldoc message in an overlay instead of echo area.
 #+END_SRC
 
 * Completion
-** Company
 
 I use company mode as a completion backend
 
@@ -1265,36 +1264,7 @@ access magit.
 #+BEGIN_SRC emacs-lisp
 (use-package magit
   :ensure t
-  :bind
-  (("C-c g" . magit-status)
-   (:map magit-status-mode-map
-         ("q" . magit-quit-session))
-   )
-  )
-#+END_SRC
-
-** Fullscreen magit
-
-#+BEGIN_QUOTE
-The following code makes magit-status run alone in the frame, and then
-restores the old window configuration when you quit out of magit.
-
-No more juggling windows after commiting. It's magit bliss.
-#+END_QUOTE
-[[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
-
-#+BEGIN_SRC emacs-lisp
-;; full screen magit-status
-(defadvice magit-status (around magit-fullscreen activate)
-  (window-configuration-to-register :magit-fullscreen)
-  ad-do-it
-  (delete-other-windows))
-
-(defun magit-quit-session ()
-  "Restores the previous window configuration and kills the magit buffer"
-  (interactive)
-  (kill-buffer)
-  (jump-to-register :magit-fullscreen))
+  :custom (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 #+END_SRC
 
 ** Git gutter
@@ -1323,80 +1293,15 @@ from ~git-gutter-fringe~.
 ** Github
 *** git-link
 
+There are plenty of alternatives. This one seems to work, so why
+bother with other packages?
+
 #+BEGIN_SRC emacs-lisp
 (use-package git-link
   :ensure t
-  :custom
-  (git-link-use-commit 't)
-  :config
-  (add-to-list 'git-link-remote-alist
-               '("git\\.ahrefs\\.com" git-link-github))
-  )
-#+END_SRC
-
-*** Handmade
-
-Doesn't handle region properly
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package seq)
-(use-package simple)
-
-(defun replace-in-string (what with in)
-  (replace-regexp-in-string (regexp-quote what) with in nil 'literal))
-
-(defun remove-newline (s)
-  "Remove newlines from the given `string'."
-
-  (concat (seq-filter (lambda (c) (not (eq ?\n c))) s)))
-
-(defun git-remote-url-part ()
-  "Extracts the part of the git origin url that is needed to
-  reference github issues.
-
-   Note, this assumes that both the remote origin is defined and
-   that the remote is in ssh format. If this is not true, then
-   this may fail. It also assumes that the working directory is
-   inside a git repo. If it is not, this will fail."
-
-  (save-match-data
-    (let ((git-output (shell-command-to-string "git remote get-url origin")))
-      (string-match "git@\\(.+\\).git" git-output)
-      (replace-in-string ":" "/" (match-string 1 git-output)))))
-
-(defun git-current-commit-hash ()
-  "Get the hash of the current commit. Assumes the working
-   directory is inside a git repo."
-
-  (remove-newline (shell-command-to-string "git --no-pager log -1 --pretty=%H")))
-
-(defun git-file-name (file)
-  "Given a file, resolve it relative to the base of the git
-   repo. Assumes that this file is part of the working tree and that
-   the workin directory is inside a git repo."
-
-  (remove-newline
-   (shell-command-to-string
-    (format "git ls-files --full-name %s" (file-name-nondirectory file)))))
-
-(defun make-github-url ()
-  "Make a URL for referencing the line at `point' in github. This
-   assumes that the file is unmodified, that the commit is present
-   in origin, as well as many suppositions of dubious merit."
-  (use-region-p)
-  (let
-      ((file (git-file-name (buffer-file-name (current-buffer))))
-       (line (line-number-at-pos (point)))
-       (remote-url-part (git-remote-url-part))
-       (hash (git-current-commit-hash)))
-    (format "https://%s/blob/%s/%s#L%s" remote-url-part hash file line)))
-
-(defun copy-github-url-to-killring ()
-  "Copy a URL for referencing the line at `point' to the kill
-   ring."
-
-  (interactive)
-  (kill-new (make-github-url)))
+  :custom (git-link-use-commit 't)
+  :config (add-to-list 'git-link-remote-alist
+               '("git\\.ahrefs\\.com" git-link-github)))
 #+END_SRC
 
 * Mercurial
@@ -1415,6 +1320,8 @@ Doesn't handle region properly
 #+END_SRC
 
 * Helm
+
+https://github.com/emacs-helm/helm/wiki/Fuzzy-matching
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm
@@ -1441,8 +1348,7 @@ Doesn't handle region properly
 (use-package helm-projectile
   :ensure t
   :config
-  (helm-projectile-on)
-  )
+  (helm-projectile-on))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -1451,8 +1357,7 @@ Doesn't handle region properly
   :bind
   ("C-S-s" . helm-swoop)
   ("M-i" . helm-multi-swoop-projectile)
-  ("M-I" . helm-swoop-back-to-last-point)
-  )
+  ("M-I" . helm-swoop-back-to-last-point))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -2095,7 +2000,7 @@ Dedicated windows.
 #+END_SRC
 * Todolist
 - winner mode
-- full frame mode
+- full frame mode https://github.com/tomterl/fullframe
 - annoying arrows https://github.com/magnars/annoying-arrows-mode.el
 - visual regexp https://github.com/benma/visual-regexp-steroids.el/
 - whole line or region https://github.com/purcell/whole-line-or-region
