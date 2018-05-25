@@ -943,7 +943,10 @@ the same as the length of ~comment-start~ to preserve indentation.
   :bind (:map tuareg-mode-map
               ("M-;" . comment-dwim))   ; restore default comment command
   :mode ("\\.ml[ily]?$" . tuareg-mode)
-  :hook (tuareg-mode . (lambda () (setq-local comment-continue "  ")))) ; TODO: should it be in custom instead?
+  :hook (tuareg-mode . (lambda ()
+                         ;; TODO: should it be in custom instead?
+                         (setq-local comment-continue "  ")
+                         (setq-local comment-style 'extra-line))))
 #+END_SRC
 
 When using ~reason-mode~, we want to load merlin from
@@ -1669,7 +1672,7 @@ Dedicated windows.
 #+BEGIN_SRC emacs-lisp
 (use-package ace-window
   :ensure t
-  :bind ("M-p" . ace-window))
+  :bind ("M-s" . ace-window))
 #+END_SRC
 
 * Utils
