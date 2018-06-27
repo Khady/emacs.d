@@ -9,7 +9,9 @@
         beginning-of-visual-line
         comment-dwim
         end-of-visual-line
+        evilmi-jump-items
         kill-region-or-word
+        kill-visual-line
         org-beginning-of-line
         org-delete-char
         org-end-of-line
@@ -17,6 +19,10 @@
         org-yank
         sp-backward-delete-char
         sp-delete-char
+        sp-forward-barf-sexp
+        sp-forward-slurp-sexp
+        transpose-sexps
+        transpose-words
         tuareg-comment-dwim
         tuareg-indent-phrase
         typescript-insert-and-indent
@@ -26,5 +32,6 @@
 (setq mc/cmds-to-run-once
       '(
         iedit-switch-to-mc-mode
+        tuareg-electric-rp
         undo-tree-visualize
         ))

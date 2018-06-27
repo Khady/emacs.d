@@ -462,8 +462,7 @@ Although Org mode ships with Emacs, the latest version can be installed external
   :ensure org-plus-contrib
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
-         ("C-c a" . org-agenda))
-  )
+         ("C-c a" . org-agenda)))
 #+END_SRC
 
 On Org mode version 9 I wasn't able to execute source blocks out of the box. [[https://emacs.stackexchange.com/a/28604][Others have ran into the same issue too]]. The solution is to remove the .elc files from the package directory:
@@ -541,8 +540,7 @@ Easy standup at work.
 (setq org-log-done 'time)
 
 (defun my/date-n-days-ago (n)
-  (format-time-string "[%Y-%m-%d]" (time-subtract (current-time) (days-to-time n)))
-  )
+  (format-time-string "[%Y-%m-%d]" (time-subtract (current-time) (days-to-time n))))
 
 (setq org-agenda-custom-commands
       '(("w" . "Standup")
@@ -625,7 +623,7 @@ Disable =validate= link at the end of html export
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(setq org-startup-folded 'showeverything)
+(setq org-startup-folded 'fold)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -803,6 +801,7 @@ Util function to select where to load merlin from.
 
 (setq opam-p (shell-cmd "which opam"))
 (setq reason-p (shell-cmd "which refmt"))
+(setq utop-p (shell-cmd "which utop"))
 (defun reason-cmd-where (cmd)
   (let ((where (shell-cmd cmd)))
     (if (string-equal "unknown flag ----where" where)
@@ -832,6 +831,61 @@ Add opam libs.
     (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
       (when (and opam-share (file-directory-p opam-share))
         (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
+#+END_SRC
+
+*** caml, reasonml and tuareg modes
+
+If no face is setup for ~merlin-type-face~, ~caml~ is required because
+it will be set to ~caml-types-expr-face~.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package caml
+  :ensure t)
+#+END_SRC
+
+We don't need the tuareg package from the emacs repositories, it
+comes from opam.
+
+The ~comment-continue~ variable is set so that multi lines comments
+are not prefixed by ~*~. The length of ~comment-continue~ should be
+the same as the length of ~comment-start~ to preserve indentation.
+
+#+BEGIN_SRC emacs-lisp
+(use-package tuareg
+  :if opam-p
+  :bind (:map tuareg-mode-map
+              ("M-;" . comment-dwim))   ; restore default comment command
+  :mode ("\\.ml[ily]?$" . tuareg-mode)
+  :hook (tuareg-mode . (lambda ()
+                         (setq-local comment-continue "  ")
+                         (setq-local comment-style 'extra-line))))
+#+END_SRC
+
+When using ~reason-mode~, we want to load merlin from
+~node_modules~ if it is available there. Otherwise it will come
+from opam.
+
+#+BEGIN_SRC emacs-lisp
+(use-package reason-mode
+  :if reason-p
+  :ensure t
+  :bind (:map reason-mode-map
+              ("C-M-\\" . refmt))
+  :custom (refmt-width-mode 'fill)
+  :config
+  (defun set-reason-fill-column ()
+    (set-fill-column 100))
+  (let* ((refmt-reason (refmt-where))
+         (merlin-reason (ocamlmerlin-where))
+         (reason-base-dir (when merlin-reason
+                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
+    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
+    (when reason-base-dir
+      (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
+      (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
+    (when refmt-reason
+      (setq refmt-command refmt-reason)))
+  :hook (reason-mode . set-reason-fill-column))
 #+END_SRC
 
 *** merlin
@@ -897,10 +951,11 @@ It is installed from opam, ~ensure~ is not required.
 
 *** utop
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package utop
-  :custom
-  (utop-edit-command nil)
+  :if utop-p
+  :diminish utop-minor-mode
+  :custom (utop-edit-command nil)
   :hook
   (tuareg-mode . (lambda ()
                    (setq utop-command "utop -emacs")
@@ -918,62 +973,6 @@ It is installed from opam, ~ensure~ is not required.
                              (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
                              prompt)))
                    (utop-minor-mode))))
-#+END_SRC
-
-*** caml, reasonml and tuareg modes
-
-If no face is setup for ~merlin-type-face~, ~caml~ is required because
-it will be set to ~caml-types-expr-face~.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package caml
-  :ensure t)
-#+END_SRC
-
-We don't need the tuareg package from the emacs repositories, it
-comes from opam.
-
-The ~comment-continue~ variable is set so that multi lines comments
-are not prefixed by ~*~. The length of ~comment-continue~ should be
-the same as the length of ~comment-start~ to preserve indentation.
-
-#+BEGIN_SRC emacs-lisp
-(use-package tuareg
-  :if opam-p
-  :bind (:map tuareg-mode-map
-              ("M-;" . comment-dwim))   ; restore default comment command
-  :mode ("\\.ml[ily]?$" . tuareg-mode)
-  :hook (tuareg-mode . (lambda ()
-                         ;; TODO: should it be in custom instead?
-                         (setq-local comment-continue "  ")
-                         (setq-local comment-style 'extra-line))))
-#+END_SRC
-
-When using ~reason-mode~, we want to load merlin from
-~node_modules~ if it is available there. Otherwise it will come
-from opam.
-
-#+BEGIN_SRC emacs-lisp
-(use-package reason-mode
-  :if reason-p
-  :ensure t
-  :bind (:map reason-mode-map
-              ("C-M-\\" . refmt))
-  :custom (refmt-width-mode 'fill)
-  :config
-  (defun set-reason-fill-column ()
-    (set-fill-column 100))
-  (let* ((refmt-reason (refmt-where))
-         (merlin-reason (ocamlmerlin-where))
-         (reason-base-dir (when merlin-reason
-                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
-    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
-    (when reason-base-dir
-      (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
-      (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
-    (when refmt-reason
-      (setq refmt-command refmt-reason)))
-  :hook (reason-mode . set-reason-fill-column))
 #+END_SRC
 
 *** lsp
@@ -1268,6 +1267,23 @@ access magit.
 (use-package magit
   :ensure t
   :custom (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
+#+END_SRC
+
+** git links
+
+For magit buffers
+https://github.com/magit/orgit
+
+#+BEGIN_SRC emacs-lisp
+(use-package orgit
+  :ensure t)
+#+END_SRC
+
+All git links
+https://orgmode.org/worg/org-contrib/org-git-link.html
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-git-link)
 #+END_SRC
 
 ** Git gutter
