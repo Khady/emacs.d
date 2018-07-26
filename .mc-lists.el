@@ -12,6 +12,7 @@
         evilmi-jump-items
         kill-region-or-word
         kill-visual-line
+        markdown-outdent-or-delete
         org-beginning-of-line
         org-delete-char
         org-end-of-line
