@@ -276,8 +276,8 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 
 Use environment variables to choose theme.
 
-#+BEGIN_SRC emacs-lisp
-(setq-local my/default-theme 'doom-tomorrow-night)
+#+BEGIN_SRC emacs-lisp :tangle no
+(setq-local my/default-theme 'doom-one-light)
 (setq-local my/bad-id-theme 'whiteboard)
 
 (defun my/print-env-theme (kind expected)
@@ -663,8 +663,8 @@ point after a small delay. Provides a merlin backend to
 
 #+BEGIN_SRC emacs-lisp
 (use-package merlin-eldoc
-  :after merlin
-  :load-path "~/Code/github/merlin-eldoc"
+  ;; :after merlin
+  :ensure t
   :custom
   (eldoc-echo-area-use-multiline-p t)
   (merlin-eldoc-max-lines 8)
