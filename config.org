@@ -276,7 +276,7 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 
 Use environment variables to choose theme.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (setq-local my/default-theme 'doom-one-light)
 (setq-local my/bad-id-theme 'whiteboard)
 
@@ -527,6 +527,7 @@ Popup for documentation or help
 * Languages
 ** Ocaml/Reason
 *** Utils
+
 Util function to select where to load merlin from.
 
 #+BEGIN_SRC emacs-lisp
@@ -569,10 +570,20 @@ Add opam libs.
         (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share)))))
 #+END_SRC
 
+*** ocp tools
+
+Require ocp stuff first because of conflicts between shortcuts.
+It is installed from opam, ~ensure~ is not required.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ocp-indent :if (shell-cmd "which ocp-indent"))
+(use-package ocp-index :if (shell-cmd "which ocp-index"))
+#+END_SRC
+
 *** caml, reasonml and tuareg modes
 
-If no face is setup for ~merlin-type-face~, ~caml~ is required because
-it will be set to ~caml-types-expr-face~.
+If no face is setup for ~merlin-type-face~, it will be set to
+~caml-types-expr-face~ which is provided by ~caml~.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package caml
@@ -602,6 +613,7 @@ When using ~reason-mode~, we want to load merlin from
 from opam.
 
 #+BEGIN_SRC emacs-lisp
+(setq my/reason-fill-column 100)
 (use-package reason-mode
   :if reason-p
   :ensure t
@@ -610,7 +622,7 @@ from opam.
   :custom (refmt-width-mode 'fill)
   :config
   (defun set-reason-fill-column ()
-    (set-fill-column 100))
+    (set-fill-column my/reason-fill-column))
   (let* ((refmt-reason (refmt-where))
          (merlin-reason (ocamlmerlin-where))
          (reason-base-dir (when merlin-reason
@@ -635,7 +647,7 @@ Configure merlin. Magical autocompletion and IDE features.
   (merlin-error-check-then-move nil)
   (merlin-command "ocamlmerlin")
   :custom-face
-  (merlin-type-face ((t (:background "dim gray"))))
+  (merlin-type-face ((t (:background "orange"))))
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
@@ -663,7 +675,6 @@ point after a small delay. Provides a merlin backend to
 
 #+BEGIN_SRC emacs-lisp
 (use-package merlin-eldoc
-  ;; :after merlin
   :ensure t
   :custom
   (eldoc-echo-area-use-multiline-p t)
@@ -673,16 +684,6 @@ point after a small delay. Provides a merlin backend to
   (merlin-eldoc-function-arguments nil)
   (merlin-eldoc-doc nil)
   :hook ((tuareg-mode reason-mode) . merlin-eldoc-setup))
-#+END_SRC
-
-*** ocp tools
-
-Require ocp stuff first because of conflicts between shortcuts.
-It is installed from opam, ~ensure~ is not required.
-
-#+BEGIN_SRC emacs-lisp
-(use-package ocp-indent :if (shell-cmd "which ocp-indent"))
-(use-package ocp-index :if (shell-cmd "which ocp-index"))
 #+END_SRC
 
 *** utop
