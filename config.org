@@ -77,6 +77,8 @@ Mai]] and [[https://github.com/technomancy/better-defaults][Better defaults]].
 
 (setq save-interprogram-paste-before-kill t)
 
+(autoload 'zap-up-to-char "misc"
+  "Kill up to, but not including ARGth occurrence of CHAR." t)
 (global-set-key (kbd "M-z") 'zap-up-to-char)
 
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
@@ -277,7 +279,7 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 Use environment variables to choose theme.
 
 #+BEGIN_SRC emacs-lisp
-(setq-local my/default-theme 'doom-one-light)
+(setq-local my/default-theme 'doom-one)
 (setq-local my/bad-id-theme 'whiteboard)
 
 (defun my/print-env-theme (kind expected)
@@ -524,7 +526,7 @@ Popup for documentation or help
   )
 #+END_SRC
 
-* Languages
+* Programming languages
 ** Ocaml/Reason
 *** Utils
 
@@ -602,7 +604,11 @@ the same as the length of ~comment-start~ to preserve indentation.
   :if opam-p
   :bind (:map tuareg-mode-map
               ("M-;" . comment-dwim))   ; restore default comment command
-  :mode ("\\.ml[ily]?$" . tuareg-mode)
+  :mode (("\\.ml[ily]?$" . tuareg-mode)
+         ("\\.topml$" . tuareg-mode)
+         ("\\.ocamlinit$" . tuareg-mode)
+         ("dune" . tuareg-dune-mode))
+  :config (load "tuareg-site-file")
   :hook (tuareg-mode . (lambda ()
                          (setq-local comment-continue "  ")
                          (setq-local comment-style 'extra-line))))
@@ -613,7 +619,6 @@ When using ~reason-mode~, we want to load merlin from
 from opam.
 
 #+BEGIN_SRC emacs-lisp
-(setq my/reason-fill-column 100)
 (use-package reason-mode
   :if reason-p
   :ensure t
@@ -621,8 +626,6 @@ from opam.
               ("C-M-\\" . refmt))
   :custom (refmt-width-mode 'fill)
   :config
-  (defun set-reason-fill-column ()
-    (set-fill-column my/reason-fill-column))
   (let* ((refmt-reason (refmt-where))
          (merlin-reason (ocamlmerlin-where))
          (reason-base-dir (when merlin-reason
@@ -632,8 +635,7 @@ from opam.
       (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
       (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
     (when refmt-reason
-      (setq refmt-command refmt-reason)))
-  :hook (reason-mode . set-reason-fill-column))
+      (setq refmt-command refmt-reason))))
 #+END_SRC
 
 *** merlin
@@ -652,16 +654,16 @@ Configure merlin. Magical autocompletion and IDE features.
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
               ("M-?" . merlin-occurrences)
-              ("C-c C-j" . merlin-jump)
-              ("C-c i" . merlin-locate-ident)
-              ("C-c C-e" . merlin-iedit-occurrences)
-              ("C-c d" . merlin-document))
+              ("C-c m j" . merlin-jump)
+              ("C-c m i" . merlin-locate-ident)
+              ("C-c m e" . merlin-iedit-occurrences)
+              ("C-c m d" . merlin-document))
   :hook
   ;; Start merlin on ml files
   ((reason-mode tuareg-mode) . merlin-mode))
 #+END_SRC
 
-*** eldoc
+*** merlin-eldoc
 
 Enable automatic display of type and documentation of value at
 point after a small delay. Provides a merlin backend to
@@ -675,6 +677,7 @@ point after a small delay. Provides a merlin backend to
 
 #+BEGIN_SRC emacs-lisp
 (use-package merlin-eldoc
+  ;; :load-path "/home/louis/Code/github/merlin-eldoc"
   :ensure t
   :custom
   (eldoc-echo-area-use-multiline-p t)
@@ -683,12 +686,15 @@ point after a small delay. Provides a merlin backend to
   (merlin-eldoc-type-verbosity 'min)
   (merlin-eldoc-function-arguments nil)
   (merlin-eldoc-doc nil)
+  :bind (:map merlin-mode-map
+              ("C-c m p" . merlin-eldoc-jump-to-prev-occurrence)
+              ("C-c m n" . merlin-eldoc-jump-to-next-occurrence))
   :hook ((tuareg-mode reason-mode) . merlin-eldoc-setup))
 #+END_SRC
 
 *** utop
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package utop
   :if utop-p
   :diminish utop-minor-mode
@@ -924,6 +930,15 @@ delimiters. It is supposed to be more powerful and work in every mode.
     (interactive)
     (smartparens-mode)
     (show-smartparens-mode))
+  (defun sp-kill-region-or-word ()
+    "Call `sp-kill-region' or `sp-backward-kill-word' depending
+on whether or not a region is selected."
+    (interactive)
+    (if (and transient-mark-mode mark-active)
+        (sp-kill-region (point) (mark))
+      (sp-backward-kill-word 1)))
+  :bind (:map smartparens-mode-map
+         ("C-w" . sp-kill-region-or-word))
   :hook
   (prog-mode . my/enable-smartparens-prog)
   (text-mode . my/enable-smartparens-text))

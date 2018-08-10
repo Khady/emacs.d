@@ -10,6 +10,7 @@
         comment-dwim
         end-of-visual-line
         evilmi-jump-items
+        indent-for-tab-command
         kill-region-or-word
         kill-visual-line
         markdown-outdent-or-delete
