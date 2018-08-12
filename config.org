@@ -526,6 +526,105 @@ Popup for documentation or help
   )
 #+END_SRC
 
+* Parentheses
+
+Rainbow delimiters, to have a different color for each level of
+=([{=.
+
+#+BEGIN_SRC emacs-lisp
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+END_SRC
+
+Smartparens aims to be a replacement for electric-pair-mode, paren,
+autopair, paredit and other modes dedicated to balancing of
+delimiters. It is supposed to be more powerful and work in every mode.
+
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
+  :ensure t
+  :config
+  (defun my/enable-smartparens-prog ()
+    "Enable all smartparens mode."
+    (interactive)
+    (smartparens-mode)
+    (smartparens-strict-mode)
+    (show-smartparens-mode)
+    (sp-use-smartparens-bindings)
+    (require 'smartparens-config))
+  (defun my/enable-smartparens-text ()
+    "Enable minimal smartparens mode without any keybinding."
+    (interactive)
+    (smartparens-mode)
+    (show-smartparens-mode))
+  (defun sp-kill-region-or-word ()
+    "Call `sp-kill-region' or `sp-backward-kill-word' depending
+on whether or not a region is selected."
+    (interactive)
+    (if (and transient-mark-mode mark-active)
+        (sp-kill-region (point) (mark))
+      (sp-backward-kill-word 1)))
+  :custom-face (sp-show-pair-match-content-face ((t (:inherit sp-show-pair-match-face))))
+  :bind (:map smartparens-strict-mode-map ("C-w" . sp-kill-region-or-word))
+  :hook
+  (prog-mode . my/enable-smartparens-prog)
+  (text-mode . my/enable-smartparens-text))
+#+END_SRC
+
+~show-paren-mode~ is smarter than smartparens to highlight between
+keywords that are detected by SMIE.
+
+#+BEGIN_SRC emacs-lisp
+(use-package paren
+  :ensure t
+  :custom
+  (show-paren-delay 0)
+  (blink-matching-paren t)
+  (blink-matching-paren-on-screen t)
+  (show-paren-style 'expression)
+  (blink-matching-paren-dont-ignore-comments t)
+  ;; To enable globally
+  ;; :config (show-paren-mode t)
+)
+#+END_SRC
+
+When smartparens is not used, the classical paredit can be a good
+backup.
+
+#+BEGIN_SRC emacs-lisp
+(use-package paredit)
+#+END_SRC
+
+For some modes like tuareg, I prefer to not use smartparens because it
+doesn't handle the pair of keywords well. Paredit doesn't handle them
+either, but it doesn't affect the default navigation function. Those
+functions are working by default because tuareg is using a SMIE based
+parser. Smartparens has its own version of the navigation functions
+that are not good for ocaml yet.
+
+#+BEGIN_SRC emacs-lisp
+(defun my/classic-parens ()
+  "Disable smartparens and replace it with old school modes.
+
+show-paren-mode + paredit + electric-pair-local-mode"
+  (interactive)
+  (smartparens-strict-mode -1)
+  (smartparens-mode -1)
+  ;; this is necessary to enable `show-paren-mode' only in one buffer
+  (make-variable-buffer-local 'show-paren-mode)
+  (show-paren-mode 1)
+  (electric-pair-local-mode)
+  (paredit-mode)
+  (defun paredit-kill-region-or-word ()
+    "Call `paredit-kill-region' or `paredit-backward-kill-word' depending
+on whether or not a region is selected."
+    (interactive)
+    (if (and transient-mark-mode mark-active)
+        (paredit-kill-region (point) (mark))
+      (paredit-backward-kill-word))))
+#+END_SRC
+
 * Programming languages
 ** Ocaml/Reason
 *** Utils
@@ -603,13 +702,15 @@ the same as the length of ~comment-start~ to preserve indentation.
 (use-package tuareg
   :if opam-p
   :bind (:map tuareg-mode-map
-              ("M-;" . comment-dwim))   ; restore default comment command
+              ("M-;" . comment-dwim) ; restore default comment command
+              ("C-w" . paredit-kill-region-or-word))
   :mode (("\\.ml[ily]?$" . tuareg-mode)
          ("\\.topml$" . tuareg-mode)
          ("\\.ocamlinit$" . tuareg-mode)
          ("dune" . tuareg-dune-mode))
   :config (load "tuareg-site-file")
   :hook (tuareg-mode . (lambda ()
+                         (my/classic-parens)
                          (setq-local comment-continue "  ")
                          (setq-local comment-style 'extra-line))))
 #+END_SRC
@@ -899,51 +1000,6 @@ I use fish as a shell
   :ensure t)
 #+END_SRC
 
-* Parentheses
-
-Rainbow delimiters, to have a different color for each level of
-=([{=.
-
-#+BEGIN_SRC emacs-lisp
-(use-package rainbow-delimiters
-  :ensure t
-  :hook (prog-mode . rainbow-delimiters-mode))
-#+END_SRC
-
-Smartparens aims to be a replacement for electric-pair-mode, paren,
-autopair, paredit and other modes dedicated to balancing of
-delimiters. It is supposed to be more powerful and work in every mode.
-
-#+BEGIN_SRC emacs-lisp
-(use-package smartparens
-  :ensure t
-  :config
-  (defun my/enable-smartparens-prog ()
-    "Enable all smartparens mode + keymap."
-    (interactive)
-    (smartparens-mode)
-    (smartparens-strict-mode)
-    (show-smartparens-mode)
-    (sp-use-smartparens-bindings)
-    (require 'smartparens-config))
-  (defun my/enable-smartparens-text ()
-    (interactive)
-    (smartparens-mode)
-    (show-smartparens-mode))
-  (defun sp-kill-region-or-word ()
-    "Call `sp-kill-region' or `sp-backward-kill-word' depending
-on whether or not a region is selected."
-    (interactive)
-    (if (and transient-mark-mode mark-active)
-        (sp-kill-region (point) (mark))
-      (sp-backward-kill-word 1)))
-  :bind (:map smartparens-mode-map
-         ("C-w" . sp-kill-region-or-word))
-  :hook
-  (prog-mode . my/enable-smartparens-prog)
-  (text-mode . my/enable-smartparens-text))
-#+END_SRC
-
 * Whitespace
 
 #+BEGIN_SRC emacs-lisp
@@ -985,20 +1041,19 @@ Same indentation rules everywhere.
 I will use it, one day... For now it is used to jump from opening
 to closing keywords in ocaml.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package evil
-  :ensure t
-  :bind
-  ("C-%" . evilmi-jump-items)
-  )
+  :ensure t)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+When jumping between sexp does not work, it might be useful to use
+this ~evil-matchit~ package. It contains some bugs for ocaml.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package evil-matchit
   :ensure t
-  :config
-  (global-evil-matchit-mode 1)
-  )
+  :config (global-evil-matchit-mode 1)
+  :bind ("C-%" . evilmi-jump-items))
 #+END_SRC
 
 * Git
@@ -1703,7 +1758,7 @@ Dedicated windows.
 #+BEGIN_SRC emacs-lisp
 (use-package ace-window
   :ensure t
-  :bind ("M-s" . ace-window))
+  :bind ("M-`" . ace-window))
 #+END_SRC
 
 * Tramp
