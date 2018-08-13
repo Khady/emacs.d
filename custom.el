@@ -27,7 +27,7 @@
  '(helm-completion-in-region-fuzzy-match t)
  '(helm-ff-fuzzy-matching t)
  '(helm-mode-fuzzy-match t)
- '(helm-recentf-fuzzy-match t t)
+ '(helm-recentf-fuzzy-match t)
  '(jdee-db-active-breakpoint-face-colors (cons "#0d0d0d" "#41728e"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#0d0d0d" "#b5bd68"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#0d0d0d" "#5a5b5a"))
@@ -35,21 +35,19 @@
  '(json-reformat:indent-width 1)
  '(linum-format " %2d")
  '(magit-display-buffer-function (quote magit-display-buffer-fullframe-status-v1))
- '(merlin-command "ocamlmerlin" t)
- '(merlin-completion-with-doc t t)
- '(merlin-eldoc-doc nil t)
- '(merlin-eldoc-function-arguments nil t)
- '(merlin-eldoc-max-lines 8 t)
- '(merlin-eldoc-max-lines-doc 8)
- '(merlin-eldoc-max-lines-function-arguments 1 t)
- '(merlin-eldoc-type-verbosity (quote min) t)
- '(merlin-error-check-then-move nil t)
+ '(merlin-command "ocamlmerlin")
+ '(merlin-completion-with-doc t)
+ '(merlin-eldoc-doc nil)
+ '(merlin-eldoc-function-arguments nil)
+ '(merlin-eldoc-max-lines 8)
+ '(merlin-eldoc-max-lines-function-arguments 1)
+ '(merlin-error-check-then-move nil)
  '(org-agenda-files
    (quote
     ("~/Code/github/emacs.d/config.org" "~/Notes/ahrefs.org" "~/Notes/beorg-local.org")))
  '(package-selected-packages
    (quote
-    (merlin-eldoc smartparens helpful bury-successful-compilation org-git-link orgit php-mode elixir-mode merlin ace-window es-mode ob-restclient electric-pair-mode which-key lsp-ui lsp-ocaml marmalade-client flycheck-package auto-dim-other-buffers framemove quelpa-use-package eldoc-overlay js2-mode browse-kill-ring popup-kill-ring paredit esup package-lint merlin-auto-hl camcorder command-log-mode solaire-mode direnv aggressive-indent elisp-def edit-indirect zerodark-theme monokai-theme reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
+    (macrostep merlin-eldoc smartparens helpful bury-successful-compilation org-git-link orgit php-mode elixir-mode merlin ace-window es-mode ob-restclient electric-pair-mode which-key lsp-ui lsp-ocaml marmalade-client flycheck-package auto-dim-other-buffers framemove quelpa-use-package eldoc-overlay js2-mode browse-kill-ring popup-kill-ring paredit esup package-lint merlin-auto-hl camcorder command-log-mode solaire-mode direnv aggressive-indent elisp-def edit-indirect zerodark-theme monokai-theme reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml tuareg scratch restclient vline vlf multiple-cursors magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
  '(projectile-completion-system (quote helm))
  '(projectile-enable-caching t)
  '(projectile-switch-project-action (quote helm-projectile-find-file))
@@ -90,4 +88,5 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(merlin-type-face ((t (:background "dim gray")))))
+ '(merlin-type-face ((t (:background "dim gray"))))
+ '(sp-show-pair-match-content-face ((t (:inherit sp-show-pair-match-face))) t))

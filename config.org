@@ -566,10 +566,7 @@ on whether or not a region is selected."
         (sp-kill-region (point) (mark))
       (sp-backward-kill-word 1)))
   :custom-face (sp-show-pair-match-content-face ((t (:inherit sp-show-pair-match-face))))
-  :bind (:map smartparens-strict-mode-map ("C-w" . sp-kill-region-or-word))
-  :hook
-  (prog-mode . my/enable-smartparens-prog)
-  (text-mode . my/enable-smartparens-text))
+  :bind (:map smartparens-strict-mode-map ("C-w" . sp-kill-region-or-word)))
 #+END_SRC
 
 ~show-paren-mode~ is smarter than smartparens to highlight between
@@ -584,16 +581,44 @@ keywords that are detected by SMIE.
   (blink-matching-paren-on-screen t)
   (show-paren-style 'expression)
   (blink-matching-paren-dont-ignore-comments t)
-  ;; To enable globally
-  ;; :config (show-paren-mode t)
-)
+  :config (show-paren-mode))
+#+END_SRC
+
+It is a global minor mode. To enable it only for prog modes, this
+trick can be used.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(show-paren-mode)          ;; activate the needed timer
+(setq show-paren-mode nil) ;; The timer will do nothing if this is nil
+
+(defun show-paren-local-mode ()
+  (interactive)
+  (make-local-variable 'show-paren-mode) ;; The value of shom-paren-mode will be local to this buffer.
+  (setq show-paren-mode t))
+
+(add-hook 'prog-mode-hook #'show-paren-local-mode)
+#+END_SRC
+
+Autopair is now replaced with electric-pair-mode.
+
+#+BEGIN_SRC emacs-lisp
+(electric-pair-mode)
 #+END_SRC
 
 When smartparens is not used, the classical paredit can be a good
 backup.
 
 #+BEGIN_SRC emacs-lisp
-(use-package paredit)
+(use-package paredit
+  :config
+  (defun paredit-kill-region-or-word ()
+    "Call `paredit-kill-region' or `paredit-backward-kill-word' depending
+on whether or not a region is selected."
+    (interactive)
+    (if (and transient-mark-mode mark-active)
+        (paredit-kill-region (point) (mark))
+      (paredit-backward-kill-word)))
+  :hook (emacs-lisp-mode . paredit-mode))
 #+END_SRC
 
 For some modes like tuareg, I prefer to not use smartparens because it
@@ -611,18 +636,10 @@ show-paren-mode + paredit + electric-pair-local-mode"
   (interactive)
   (smartparens-strict-mode -1)
   (smartparens-mode -1)
-  ;; this is necessary to enable `show-paren-mode' only in one buffer
-  (make-variable-buffer-local 'show-paren-mode)
+  (show-smartparens-mode -1)
   (show-paren-mode 1)
   (electric-pair-local-mode)
-  (paredit-mode)
-  (defun paredit-kill-region-or-word ()
-    "Call `paredit-kill-region' or `paredit-backward-kill-word' depending
-on whether or not a region is selected."
-    (interactive)
-    (if (and transient-mark-mode mark-active)
-        (paredit-kill-region (point) (mark))
-      (paredit-backward-kill-word))))
+  (paredit-mode))
 #+END_SRC
 
 * Programming languages
@@ -708,11 +725,14 @@ the same as the length of ~comment-start~ to preserve indentation.
          ("\\.topml$" . tuareg-mode)
          ("\\.ocamlinit$" . tuareg-mode)
          ("dune" . tuareg-dune-mode))
-  :config (load "tuareg-site-file")
-  :hook (tuareg-mode . (lambda ()
-                         (my/classic-parens)
-                         (setq-local comment-continue "  ")
-                         (setq-local comment-style 'extra-line))))
+  :config
+  (load "tuareg-site-file")
+  (defun my/setup-tuareg ()
+    (interactive)
+    (my/classic-parens)
+    (setq-local comment-continue "  ")
+    (setq-local comment-style 'extra-line))
+  :hook (tuareg-mode . my/setup-tuareg))
 #+END_SRC
 
 When using ~reason-mode~, we want to load merlin from
@@ -970,10 +990,14 @@ Python has a big jedi package to have completion and many other nice things.
 ** Lisp
 
 #+BEGIN_SRC emacs-lisp
+(use-package macrostep
+  :bind ("C-c e m" . macrostep-expand))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
 (use-package elisp-def
   :ensure t
-  :hook
-  (emacs-lisp . elisp-def-mode))
+  :hook (emacs-lisp-mode . elisp-def-mode))
 #+END_SRC
 
 ~package-lint~ to check files that are emacs libraries

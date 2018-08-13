@@ -19,6 +19,7 @@
         org-end-of-line
         org-self-insert-command
         org-yank
+        paredit-semicolon
         sp-backward-delete-char
         sp-delete-char
         sp-forward-barf-sexp
