@@ -602,7 +602,10 @@ trick can be used.
 Autopair is now replaced with electric-pair-mode.
 
 #+BEGIN_SRC emacs-lisp
-(electric-pair-mode)
+(use-package elec-pair
+  :ensure t
+  :config
+  (electric-pair-mode))
 #+END_SRC
 
 When smartparens is not used, the classical paredit can be a good
@@ -726,10 +729,11 @@ the same as the length of ~comment-start~ to preserve indentation.
          ("\\.ocamlinit$" . tuareg-mode)
          ("dune" . tuareg-dune-mode))
   :config
+  (unbind-key "<backspace>" tuareg-mode-map)
   (load "tuareg-site-file")
   (defun my/setup-tuareg ()
     (interactive)
-    (my/classic-parens)
+    (paredit-mode)
     (setq-local comment-continue "  ")
     (setq-local comment-style 'extra-line))
   :hook (tuareg-mode . my/setup-tuareg))
