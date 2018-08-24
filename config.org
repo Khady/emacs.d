@@ -824,23 +824,22 @@ point after a small delay. Provides a merlin backend to
   :if utop-p
   :diminish utop-minor-mode
   :custom (utop-edit-command nil)
+  :config
+  (defun my/setup-utop (name)
+    (setq utop-command (format "%s -emacs") name)
+    (setq utop-prompt
+          (lambda ()
+            (let ((prompt (format "%s[%d]> " name utop-command-number)))
+              (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
+              prompt)))
+    (utop-minor-mode))
+  (defun my/setup-utop-tuareg ()
+    (my/setup-utop "utop"))
+  (defun my/setup-utop-reason ()
+    (my/setup-utop "rtop"))
   :hook
-  (tuareg-mode . (lambda ()
-                   (setq utop-command "utop -emacs")
-                   (setq utop-prompt
-                         (lambda ()
-                           (let ((prompt (format "utop[%d]> " utop-command-number)))
-                             (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
-                             prompt)))
-                   (utop-minor-mode)))
-  (reason-mode . (lambda ()
-                   (setq utop-command "rtop -emacs")
-                   (setq utop-prompt
-                         (lambda ()
-                           (let ((prompt (format "rtop[%d]> " utop-command-number)))
-                             (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
-                             prompt)))
-                   (utop-minor-mode))))
+  (tuareg-mode . my/setup-utop-tuareg)
+  (reason-mode . my/setup-utop-reason))
 #+END_SRC
 
 *** lsp
@@ -873,10 +872,9 @@ yarn global add ocaml-language-server
   :bind (:map tide-mode-map
               ("M-?" . tide-references)
               ("C-c C-e" . tide-rename-symbol)
-              ("C-c C-x" . flycheck-next-error)
-              )
+              ("C-c C-x" . flycheck-next-error))
   :init
-  (defun setup-tide-mode ()
+  (defun my/setup-tide-mode ()
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
@@ -888,9 +886,10 @@ yarn global add ocaml-language-server
     ;; install it separately via package-install
     ;; `M-x package-install [ret] company`
     (company-mode +1))
-  (add-hook 'typescript-mode-hook #'setup-tide-mode)
-  (add-hook 'js2-mode-hook #'setup-tide-mode)
-  )
+  :hook
+  ((typescript-mode js2-mode) . my/setup-tide-mode))
+  ;; (add-hook 'typescript-mode-hook #'setup-tide-mode)
+  ;; (add-hook 'js2-mode-hook #'setup-tide-mode))
 #+END_SRC
 
 ** Javascript

@@ -6,6 +6,7 @@
         autopair-insert-opening
         autopair-insert-or-skip-quote
         autopair-skip-close-maybe
+        backward-sexp
         beginning-of-visual-line
         comment-dwim
         end-of-visual-line
