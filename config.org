@@ -2117,6 +2117,7 @@ To launch emacs client and specify the server name:
       (message "Replacing original server name %s with %s...done"
                server-name env-server-name)
       (setq server-name env-server-name)))
+  (add-to-list 'default-frame-alist `(title . ,server-name))
   (server-start))
 #+END_SRC
 
