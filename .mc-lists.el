@@ -20,6 +20,8 @@
         org-end-of-line
         org-self-insert-command
         org-yank
+        paredit-forward-kill-word
+        paredit-kill-region-or-word
         paredit-semicolon
         sp-backward-delete-char
         sp-delete-char
@@ -35,6 +37,7 @@
 
 (setq mc/cmds-to-run-once
       '(
+        ace-window
         iedit-switch-to-mc-mode
         tuareg-electric-rp
         undo-tree-visualize

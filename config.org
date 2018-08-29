@@ -711,16 +711,13 @@ If no face is setup for ~merlin-type-face~, it will be set to
   :ensure t)
 #+END_SRC
 
-We don't need the tuareg package from the emacs repositories, it
-comes from opam.
-
 The ~comment-continue~ variable is set so that multi lines comments
 are not prefixed by ~*~. The length of ~comment-continue~ should be
 the same as the length of ~comment-start~ to preserve indentation.
 
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg
-  :if opam-p
+  :ensure t
   :bind (:map tuareg-mode-map
               ("M-;" . comment-dwim) ; restore default comment command
               ("C-w" . paredit-kill-region-or-word))
@@ -736,7 +733,9 @@ the same as the length of ~comment-start~ to preserve indentation.
     (paredit-mode)
     (setq-local comment-continue "  ")
     (setq-local comment-style 'extra-line))
-  :hook (tuareg-mode . my/setup-tuareg))
+  :hook
+  (tuareg-mode . my/setup-tuareg)
+  (tuareg-dune-mode . paredit-mode))
 #+END_SRC
 
 When using ~reason-mode~, we want to load merlin from
@@ -826,10 +825,11 @@ point after a small delay. Provides a merlin backend to
   :custom (utop-edit-command nil)
   :config
   (defun my/setup-utop (name)
-    (setq utop-command (format "%s -emacs") name)
+    (setq my/utop-name name)
+    (setq utop-command (format "%s -emacs" my/utop-name))
     (setq utop-prompt
           (lambda ()
-            (let ((prompt (format "%s[%d]> " name utop-command-number)))
+            (let ((prompt (format "%s[%d]> " my/utop-name utop-command-number)))
               (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
               prompt)))
     (utop-minor-mode))
