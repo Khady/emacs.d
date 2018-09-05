@@ -11,17 +11,21 @@
         comment-dwim
         end-of-visual-line
         evilmi-jump-items
+        forward-sexp
         indent-for-tab-command
         kill-region-or-word
         kill-visual-line
+        mark-sexp
         markdown-outdent-or-delete
         org-beginning-of-line
         org-delete-char
         org-end-of-line
         org-self-insert-command
         org-yank
+        paredit-forward
         paredit-forward-kill-word
         paredit-kill-region-or-word
+        paredit-open-round
         paredit-semicolon
         sp-backward-delete-char
         sp-delete-char
@@ -30,6 +34,7 @@
         transpose-sexps
         transpose-words
         tuareg-comment-dwim
+        tuareg-electric-pipe
         tuareg-indent-phrase
         typescript-insert-and-indent
         yaml-electric-dash-and-dot

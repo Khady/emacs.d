@@ -697,6 +697,8 @@ Util function to select where to load merlin from.
   (reason-cmd-where "ocamlmerlin ----where"))
 (defun refmt-where ()
   (reason-cmd-where "refmt ----where"))
+(defun utop-where ()
+  (reason-cmd-where "utop ----where"))
 #+END_SRC
 
 *** Load opam
@@ -779,13 +781,19 @@ from opam.
   :custom (refmt-width-mode 'fill)
   :config
   (let* ((refmt-reason (refmt-where))
+         (utop-reason (utop-where))
+         (utop-base-dir (when utop-reason
+                          (replace-regexp-in-string "bin/utop$" "" utop-reason)))
          (merlin-reason (ocamlmerlin-where))
-         (reason-base-dir (when merlin-reason
+         (merlin-base-dir (when merlin-reason
                             (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
     ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
-    (when reason-base-dir
-      (message "loading merlin from %s" (concat reason-base-dir "share/emacs/site-lisp/"))
-      (add-to-list 'load-path (concat reason-base-dir "share/emacs/site-lisp/")))
+    (when merlin-base-dir
+      (message "loading merlin from %s" (concat merlin-base-dir "share/emacs/site-lisp/"))
+      (add-to-list 'load-path (concat merlin-base-dir "share/emacs/site-lisp/")))
+    (when utop-base-dir
+      (message "loading utop from %s" (concat utop-base-dir "share/emacs/site-lisp/"))
+      (add-to-list 'load-path (concat utop-base-dir "share/emacs/site-lisp/")))
     (when refmt-reason
       (setq refmt-command refmt-reason))))
 #+END_SRC
