@@ -1131,6 +1131,17 @@ access magit.
   :custom (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 #+END_SRC
 
+** Magithub
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package magithub
+  :after magit
+  :ensure t
+  :config
+  ; (add-to-list 'magithub-github-hosts "git.ahrefs.com")
+  (magithub-feature-autoinject t))
+#+END_SRC
+
 ** git links
 
 For magit buffers
