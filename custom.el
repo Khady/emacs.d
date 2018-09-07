@@ -28,7 +28,7 @@
  '(helm-completion-in-region-fuzzy-match t)
  '(helm-ff-fuzzy-matching t)
  '(helm-mode-fuzzy-match t)
- '(helm-recentf-fuzzy-match t t)
+ '(helm-recentf-fuzzy-match t)
  '(jdee-db-active-breakpoint-face-colors (cons "#0d0d0d" "#41728e"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#0d0d0d" "#b5bd68"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#0d0d0d" "#5a5b5a"))
@@ -36,14 +36,14 @@
  '(json-reformat:indent-width 1)
  '(linum-format " %2d")
  '(magit-display-buffer-function (quote magit-display-buffer-fullframe-status-v1))
- '(merlin-command "ocamlmerlin" t)
- '(merlin-completion-with-doc t t)
- '(merlin-eldoc-doc nil t)
- '(merlin-eldoc-function-arguments nil t)
- '(merlin-eldoc-max-lines 8 t)
- '(merlin-eldoc-max-lines-function-arguments 1 t)
- '(merlin-eldoc-type-verbosity (quote min) t)
- '(merlin-error-check-then-move nil t)
+ '(merlin-command "ocamlmerlin")
+ '(merlin-completion-with-doc t)
+ '(merlin-eldoc-doc nil)
+ '(merlin-eldoc-function-arguments nil)
+ '(merlin-eldoc-max-lines 8)
+ '(merlin-eldoc-max-lines-function-arguments 1)
+ '(merlin-eldoc-type-verbosity (quote min))
+ '(merlin-error-check-then-move nil)
  '(org-agenda-files
    (quote
     ("~/Code/github/emacs.d/config.org" "~/Notes/ahrefs.org" "~/Notes/beorg-local.org")))
@@ -55,13 +55,21 @@
  '(projectile-switch-project-action (quote helm-projectile-find-file))
  '(quelpa-checkout-melpa-p nil)
  '(quelpa-update-melpa-p nil)
- '(safe-local-variable-values (quote ((projectile-project-compilation-dir . "."))))
+ '(safe-local-variable-values
+   (quote
+    ((eval progn
+           (require
+            (quote projectile))
+           (puthash
+            (projectile-project-root)
+            "make byte" projectile-compilation-cmd-map))
+     (projectile-project-compilation-dir . "."))))
  '(save-place t)
  '(save-place-file "/home/louis/.emacs.d/.places")
  '(save-place-mode t)
  '(show-paren-delay 0)
  '(show-paren-style (quote expression))
- '(utop-edit-command nil t)
+ '(utop-edit-command nil)
  '(vc-annotate-background "#1d1f21")
  '(vc-annotate-color-map
    (list

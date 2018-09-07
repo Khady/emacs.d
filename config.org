@@ -632,8 +632,7 @@ Autopair is now replaced with electric-pair-mode.
 #+BEGIN_SRC emacs-lisp
 (use-package elec-pair
   :ensure t
-  :config
-  (electric-pair-mode))
+  :config (electric-pair-mode))
 #+END_SRC
 
 When smartparens is not used, the classical paredit can be a good
@@ -1626,6 +1625,17 @@ customization as with the normal linum mode.
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package nlinum-relative
   :ensure t)
+#+END_SRC
+
+* Helpful
+
+#+BEGIN_SRC emacs-lisp
+(use-package helpful
+  :ensure t
+  :bind
+  ("C-h f" . helpful-callable)
+  ("C-h v" . helpful-variable)
+  ("C-h k" . helpful-key))
 #+END_SRC
 
 * Regexp
