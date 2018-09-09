@@ -134,7 +134,10 @@ Auto reload file when there is a change
 (setq compilation-scroll-output 'first-error)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+This package allows the hide the compilation buffer if compilation is
+successful. But its behavior is hard to predict.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package bury-successful-compilation
   :config (bury-successful-compilation 1))
 #+END_SRC
@@ -149,7 +152,7 @@ disable colors.
   :demand t
   :custom (compilation-environment
            '("TERM=xterm-256color"      ; allow colors
-             "NINJA_ANSI_FORCED=0"      ; but not from bsb or other ninja users
+             ;; "NINJA_ANSI_FORCED=0"   ; but not from bsb or other ninja users
              ))
   :config
   (defun my/compilation-color (proc)
@@ -779,6 +782,11 @@ from opam.
               ("C-M-\\" . refmt))
   :custom (refmt-width-mode 'fill)
   :config
+  ;; The messages from -bs-super-errors are not standard
+  (add-to-list
+   'compilation-error-regexp-alist
+   '("^[ \t]*\\(?:We've found a bug for you!\\)?\\(?:Warning number \\([0-9]+\\)\\)?[\n ]*\\([^ ]+\\) +\\([0-9]+\\):\\([0-9]+\\)-?\\(?:\\([0-9]+\\):\\)?\\([0-9]+\\)?$"
+     2 (3 . 5) (4 . 6) 1))
   (let* ((refmt-reason (refmt-where))
          (utop-reason (utop-where))
          (utop-base-dir (when utop-reason
