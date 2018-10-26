@@ -320,7 +320,7 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 Use environment variables to choose theme.
 
 #+BEGIN_SRC emacs-lisp
-(setq-local my/default-theme 'doom-one)
+(setq-local my/default-theme 'doom-one-light)
 (setq-local my/bad-id-theme 'whiteboard)
 
 (defun my/print-env-theme (kind expected)
@@ -518,6 +518,32 @@ file not under a ~.envrc~ file the env will be lost in this file.
   :ensure t
   :config
   (direnv-mode))
+#+END_SRC
+
+* Flymake
+
+#+BEGIN_SRC emacs-lisp
+(defun next-flymake-error ()
+  (interactive)
+  (let ((err-buf nil))
+    (condition-case err
+        (setq err-buf (next-error-find-buffer))
+      (error))
+    (if err-buf
+        (next-error)
+      (progn
+        (flymake-goto-next-error)
+        (let ((err (get-char-property (point) 'help-echo)))
+          (when err
+            (message err)))))))
+
+(use-package flymake
+  :ensure t
+  :bind
+  ("C-c <f8>" . flymake-mode)
+  ("C-c <f7>" . next-flymake-error)
+  ("C-c <f6>"  . flymake-goto-next-error)
+  ("<f7>" . next-error))
 #+END_SRC
 
 * Eldoc
@@ -821,7 +847,7 @@ Configure merlin. Magical autocompletion and IDE features.
   (merlin-error-check-then-move nil)
   (merlin-command "ocamlmerlin")
   :custom-face
-  (merlin-type-face ((t (:background "orange"))))
+  (merlin-type-face ((t (:background "#a0bcf8"))))
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
@@ -888,6 +914,13 @@ point after a small delay. Provides a merlin backend to
   :hook
   (tuareg-mode . my/setup-utop-tuareg)
   (reason-mode . my/setup-utop-reason))
+#+END_SRC
+
+*** Dune
+
+#+BEGIN_SRC emacs-lisp
+(use-package dune-flymake)
+(use-package dune)
 #+END_SRC
 
 *** lsp
@@ -1158,7 +1191,7 @@ access magit.
   :after magit
   :ensure t
   :config
-  (add-to-list 'magithub-github-hosts "git.ahrefs.com")
+  ; (add-to-list 'magithub-github-hosts "git.ahrefs.com")
   (magithub-feature-autoinject t))
 #+END_SRC
 
@@ -1724,32 +1757,6 @@ creating a buffer to do some scratch work or reusing the initial
 (use-package scratch
   :ensure t
   :commands scratch)
-#+END_SRC
-
-* Flymake
-
-#+BEGIN_SRC emacs-lisp
-(defun next-flymake-error ()
-  (interactive)
-  (let ((err-buf nil))
-    (condition-case err
-        (setq err-buf (next-error-find-buffer))
-      (error))
-    (if err-buf
-        (next-error)
-      (progn
-        (flymake-goto-next-error)
-        (let ((err (get-char-property (point) 'help-echo)))
-          (when err
-            (message err)))))))
-
-(use-package flymake
-  :ensure t
-  :bind
-  ("C-c <f8>" . flymake-mode)
-  ("C-c <f7>" . next-flymake-error)
-  ("C-c <f6>"  . flymake-goto-next-error)
-  ("<f7>" . next-error))
 #+END_SRC
 
 * GDB

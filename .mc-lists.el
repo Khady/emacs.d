@@ -9,6 +9,7 @@
         backward-sexp
         beginning-of-visual-line
         comment-dwim
+        electric-pair-delete-pair
         end-of-visual-line
         evilmi-jump-items
         forward-sexp
