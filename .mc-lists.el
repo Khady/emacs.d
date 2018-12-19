@@ -23,12 +23,15 @@
         org-end-of-line
         org-self-insert-command
         org-yank
+        paredit-backward
         paredit-forward
         paredit-forward-delete
         paredit-forward-kill-word
+        paredit-forward-slurp-sexp
         paredit-kill-region-or-word
         paredit-open-round
         paredit-semicolon
+        paredit-splice-sexp
         sp-backward-delete-char
         sp-delete-char
         sp-forward-barf-sexp

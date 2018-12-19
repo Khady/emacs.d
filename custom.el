@@ -36,20 +36,20 @@
  '(json-reformat:indent-width 1)
  '(linum-format " %2d")
  '(magit-display-buffer-function (quote magit-display-buffer-fullframe-status-v1))
- '(merlin-command "ocamlmerlin" t)
- '(merlin-completion-with-doc t t)
- '(merlin-eldoc-doc nil t)
- '(merlin-eldoc-function-arguments nil t)
- '(merlin-eldoc-max-lines 8 t)
- '(merlin-eldoc-max-lines-function-arguments 1 t)
- '(merlin-eldoc-type-verbosity (quote min) t)
- '(merlin-error-check-then-move nil t)
+ '(merlin-command "ocamlmerlin")
+ '(merlin-completion-with-doc t)
+ '(merlin-eldoc-doc nil)
+ '(merlin-eldoc-function-arguments nil)
+ '(merlin-eldoc-max-lines 8)
+ '(merlin-eldoc-max-lines-function-arguments 1)
+ '(merlin-eldoc-type-verbosity (quote min))
+ '(merlin-error-check-then-move nil)
  '(org-agenda-files
    (quote
     ("~/Code/github/emacs.d/config.org" "~/Notes/ahrefs.org" "~/Notes/beorg-local.org")))
  '(package-selected-packages
    (quote
-    (flymake-cursor rainbow-mode copy-as-format ob-epub ox-epub tuareg visual-regexp eglot magithub xterm-color macrostep merlin-eldoc smartparens helpful bury-successful-compilation org-git-link orgit php-mode elixir-mode merlin ace-window es-mode ob-restclient electric-pair-mode which-key lsp-ui lsp-ocaml marmalade-client flycheck-package auto-dim-other-buffers framemove quelpa-use-package eldoc-overlay js2-mode browse-kill-ring popup-kill-ring paredit esup package-lint merlin-auto-hl camcorder command-log-mode solaire-mode direnv aggressive-indent elisp-def edit-indirect zerodark-theme monokai-theme reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml scratch restclient vline vlf multiple-cursors magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
+    (zoom-window wgrep-helm wgrep deadgrep flymake-cursor rainbow-mode copy-as-format ob-epub ox-epub tuareg visual-regexp eglot magithub xterm-color macrostep merlin-eldoc smartparens helpful bury-successful-compilation org-git-link orgit php-mode elixir-mode merlin ace-window es-mode ob-restclient electric-pair-mode which-key lsp-ui lsp-ocaml marmalade-client flycheck-package auto-dim-other-buffers framemove quelpa-use-package eldoc-overlay js2-mode browse-kill-ring popup-kill-ring paredit esup package-lint merlin-auto-hl camcorder command-log-mode solaire-mode direnv aggressive-indent elisp-def edit-indirect zerodark-theme monokai-theme reason-mode nginx-mode tree-mode json-navigator ahg monky browse-at-remote git-link git-gutter htmlize zenburn-theme caml scratch restclient vline vlf multiple-cursors magit iedit projectile-ripgrep helm-swoop helm-projectile helm git-gutter-fringe fish-mode fish-completion evil-matchit evil editorconfig autopair rainbow-delimiters yaml-mode puppet-mode protobuf-mode markdown-mode rust-mode json-mode web-mode tide company-quickhelp company ob-http org-plus-contrib exec-path-from-shell solarized-theme doom-themes diminish use-package)))
  '(projectile-completion-system (quote helm))
  '(projectile-enable-caching t nil nil "Customized with use-package projectile")
  '(projectile-switch-project-action (quote helm-projectile-find-file) nil nil "Customized with use-package projectile")
@@ -58,6 +58,46 @@
  '(safe-local-variable-values
    (quote
     ((eval progn
+           (my/setup-utop-dune
+            (format "%sbackend/api/src/"
+                    (projectile-project-root))))
+     (eval progn
+           (my/setup-utop-dune
+            (format "%sbackend/api/src"
+                    (projectile-project-root))))
+     (eval progn
+           (my/setup-utop-dune
+            (format "%s/backend/api/src"
+                    (projectile-project-root))))
+     (eval progn
+           (require
+            (quote projectile))
+           (puthash
+            (projectile-project-root)
+            "make -C backend/api bbyte" projectile-compilation-cmd-map))
+     (eval message "lol")
+     (eval progn
+           (require
+            (quote projectile))
+           (puthash
+            (projectile-project-root)
+            "make -C backend/api byte" projectile-compilation-cmd-map)
+           (message "setup utop to %s" default-directory)
+           (my/setup-utop-dune
+            (format "%s/src" default-directory)))
+     (eval progn
+           (require
+            (quote projectile))
+           (puthash
+            (projectile-project-root)
+            "cd packages/keywords-explorer && yarn build:bsb" projectile-compilation-cmd-map))
+     (eval progn
+           (require
+            (quote projectile))
+           (puthash
+            (projectile-project-root)
+            "make -C backend/api byte" projectile-compilation-cmd-map))
+     (eval progn
            (require
             (quote projectile))
            (puthash
@@ -75,7 +115,6 @@
  '(save-place-mode t)
  '(show-paren-delay 0)
  '(show-paren-style (quote expression))
- '(utop-edit-command nil t)
  '(vc-annotate-background "#282c34")
  '(vc-annotate-color-map
    (list

@@ -800,7 +800,7 @@ the same as the length of ~comment-start~ to preserve indentation.
     (interactive)
     (paredit-mode)
     (setq-local comment-continue "  ")
-    (setq-local comment-style 'extra-line))
+    (setq-local comment-style 'indent))
   :hook
   (tuareg-mode . my/setup-tuareg)
   (tuareg-dune-mode . paredit-mode))
@@ -896,11 +896,11 @@ point after a small delay. Provides a merlin backend to
 (use-package utop
   :if utop-p
   :diminish utop-minor-mode
-  :custom (utop-edit-command nil)
+  :custom (utop-edit-command t)
   :config
-  (defun my/setup-utop (name)
-    (setq my/utop-name name)
-    (setq utop-command (format "%s -emacs" my/utop-name))
+  (defun my/setup-utop (cmd &optional name)
+    (setq my/utop-name (if name name cmd))
+    (setq utop-command (format "%s -emacs" cmd))
     (setq utop-prompt
           (lambda ()
             (let ((prompt (format "%s[%d]> " my/utop-name utop-command-number)))
@@ -911,6 +911,13 @@ point after a small delay. Provides a merlin backend to
     (my/setup-utop "utop"))
   (defun my/setup-utop-reason ()
     (my/setup-utop "rtop"))
+  (defun my/setup-utop-dune (&optional path)
+    (let* ((path (if path path "./"))
+           (rel-path (file-relative-name path default-directory))
+           (cmd (format "dune utop %s --" rel-path))
+           (path-dirname (file-name-nondirectory (directory-file-name (file-name-directory path))))
+           (name (format "[dune %s]" path-dirname)))
+      (my/setup-utop cmd name)))
   :hook
   (tuareg-mode . my/setup-utop-tuareg)
   (reason-mode . my/setup-utop-reason))
@@ -1106,6 +1113,25 @@ I use fish as a shell
 #+BEGIN_SRC emacs-lisp
 (use-package fish-mode
   :ensure t)
+#+END_SRC
+
+*** dir locals
+
+Then it is possible to create a ~.dir-locals.el~ file to setup
+compilation and utop commands.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+((nil
+  (eval progn
+        (require 'projectile)
+        (puthash
+         (projectile-project-root)
+         "make -C backend/api byte" projectile-compilation-cmd-map)))
+ ("src"
+  (tuareg-mode
+   (eval progn
+         (my/setup-utop-dune
+          (format "%sbackend/api/src/" (projectile-project-root)))))))
 #+END_SRC
 
 * Whitespace
@@ -1867,7 +1893,9 @@ Dedicated windows.
 #+BEGIN_SRC emacs-lisp
 (use-package ace-window
   :ensure t
-  :bind ("M-`" . ace-window))
+  :bind
+  ("M-`" . ace-window)
+  ("M-/" . aw-flip-window))
 #+END_SRC
 
 * Tramp
