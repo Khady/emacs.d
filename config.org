@@ -1209,10 +1209,23 @@ access magit.
   :ensure t
   :custom (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
 #+END_SRC
+** Forge
+
+#+BEGIN_SRC emacs-lisp
+(use-package forge
+  :ensure t
+  :after magit
+  :config
+  (add-to-list 'forge-alist
+               '("git.ahrefs.com"
+                 "git.ahrefs.com/api"
+                 "git.ahrefs.com"
+                 forge-github-repository)))
+#+END_SRC
 
 ** Magithub
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package magithub
   :after magit
   :ensure t
