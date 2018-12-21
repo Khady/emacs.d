@@ -385,11 +385,11 @@ And here's how we tell Emacs to use the font we want to use.
 #+BEGIN_SRC emacs-lisp
 (cond
  ((member "PragmataPro" (font-family-list))
-  (set-face-attribute 'default nil :font "PragmataPro-12"))
+  (set-face-attribute 'default nil :font "PragmataPro-10"))
  ((member "Ubuntu Mono" (font-family-list))
-  (set-face-attribute 'default nil :font "Ubuntu Mono-12"))
+  (set-face-attribute 'default nil :font "Ubuntu Mono-10"))
  ((member "DejaVu Sans Mono" (font-family-list))
-  (set-face-attribute 'default nil :font "DejaVu Sans Mono-12")))
+  (set-face-attribute 'default nil :font "DejaVu Sans Mono-10")))
 #+END_SRC
 
 Note: To view all fonts that are available to use, run the following:
@@ -564,6 +564,15 @@ Display eldoc message in an overlay instead of echo area.
   :ensure t)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package eldoc-box
+    :quelpa ((eldoc-box :fetcher github :repo "casouri/eldoc-box"))
+    :custom
+    (eldoc-box-max-pixel-width 1400)
+    (eldoc-box-max-pixel-height 800)
+    :hook (eglot--managed-mode . eldoc-box-hover-mode-hook))
+#+END_SRC
+
 * Completion
 
 I use company mode as a completion backend
@@ -679,6 +688,7 @@ backup.
 
 #+BEGIN_SRC emacs-lisp
 (use-package paredit
+  :ensure t
   :config
   (defun paredit-kill-region-or-word ()
     "Call `paredit-kill-region' or `paredit-backward-kill-word' depending
@@ -1354,6 +1364,31 @@ https://github.com/emacs-helm/helm/wiki/Fuzzy-matching
   :ensure t)
 #+END_SRC
 
+* Restclient
+
+See [[http://emacsrocks.com/e15.html][Emacs Rocks! Episode 15]] to learn how restclient can help out with
+testing APIs from within Emacs. The HTTP calls you make in the buffer
+aren't constrainted within Emacs; there's the
+=restclient-copy-curl-command= to get the equivalent =curl= call
+string to keep things portable.
+
+#+BEGIN_SRC emacs-lisp
+(use-package restclient
+  :ensure t
+  :mode ("\\.restclient\\'" . restclient-mode))
+#+END_SRC
+
+* Elasticsearch
+
+It is convenient to be able to query elasticsearch from emacs. It can
+be done from restclient or ob-html. But ~es-mode~ comes with some nice
+things like tables when using ~ob-elasticsearch~.
+
+#+BEGIN_SRC emacs-lisp
+(use-package es-mode
+  :ensure t)
+#+END_SRC
+
 * Org mode
 ** Installation
 
@@ -1757,31 +1792,6 @@ I never took time to really use this...
 
 #+BEGIN_SRC emacs-lisp
 (use-package vlf
-  :ensure t)
-#+END_SRC
-
-* Restclient
-
-See [[http://emacsrocks.com/e15.html][Emacs Rocks! Episode 15]] to learn how restclient can help out with
-testing APIs from within Emacs. The HTTP calls you make in the buffer
-aren't constrainted within Emacs; there's the
-=restclient-copy-curl-command= to get the equivalent =curl= call
-string to keep things portable.
-
-#+BEGIN_SRC emacs-lisp
-(use-package restclient
-  :ensure t
-  :mode ("\\.restclient\\'" . restclient-mode))
-#+END_SRC
-
-* Elasticsearch
-
-It is convenient to be able to query elasticsearch from emacs. It can
-be done from restclient or ob-html. But ~es-mode~ comes with some nice
-things like tables when using ~ob-elasticsearch~.
-
-#+BEGIN_SRC emacs-lisp
-(use-package es-mode
   :ensure t)
 #+END_SRC
 
