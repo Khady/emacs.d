@@ -546,6 +546,14 @@ file not under a ~.envrc~ file the env will be lost in this file.
   ("<f7>" . next-error))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(use-package flymake-diagnostic-at-point
+  :if (version<= "26.0" emacs-version)
+  :after flymake
+  :config
+  (add-hook 'flymake-mode-hook #'flymake-diagnostic-at-point-mode))
+#+END_SRC
+
 * Eldoc
 
 ~eldoc-mode~ provides information about the symbol at point in the
@@ -564,13 +572,14 @@ Display eldoc message in an overlay instead of echo area.
   :ensure t)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package eldoc-box
-    :quelpa ((eldoc-box :fetcher github :repo "casouri/eldoc-box"))
-    :custom
-    (eldoc-box-max-pixel-width 1400)
-    (eldoc-box-max-pixel-height 800)
-    :hook (eglot--managed-mode . eldoc-box-hover-mode-hook))
+#+BEGIN_SRC emacs-lisp
+(use-package eldoc-box
+  :if (version<= "26.0" emacs-version)
+  :quelpa ((eldoc-box :fetcher github :repo "casouri/eldoc-box"))
+  :custom
+  (eldoc-box-max-pixel-width 1400)
+  (eldoc-box-max-pixel-height 800)
+  :hook (eglot--managed-mode . eldoc-box-hover-mode-hook))
 #+END_SRC
 
 * Completion
