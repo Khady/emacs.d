@@ -30,6 +30,7 @@
         paredit-forward-slurp-sexp
         paredit-kill-region-or-word
         paredit-open-round
+        paredit-open-square
         paredit-semicolon
         paredit-splice-sexp
         sp-backward-delete-char

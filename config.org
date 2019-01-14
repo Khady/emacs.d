@@ -1226,7 +1226,9 @@ access magit.
 #+BEGIN_SRC emacs-lisp
 (use-package magit
   :ensure t
-  :custom (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1))
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+  (magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18)))
 #+END_SRC
 ** Forge
 
