@@ -240,7 +240,7 @@ Install packages from github or local files.
 
 Theme of the [[https://github.com/hlissner/doom-emacs][doom emacs configuration]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package doom-themes
   :ensure t
   :custom
@@ -319,7 +319,7 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 
 Use environment variables to choose theme.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (setq-local my/default-theme 'doom-one-light)
 (setq-local my/bad-id-theme 'whiteboard)
 
@@ -626,7 +626,7 @@ Smartparens aims to be a replacement for electric-pair-mode, paren,
 autopair, paredit and other modes dedicated to balancing of
 delimiters. It is supposed to be more powerful and work in every mode.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package smartparens
   :ensure t
   :config
@@ -695,7 +695,7 @@ Autopair is now replaced with electric-pair-mode.
 When smartparens is not used, the classical paredit can be a good
 backup.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package paredit
   :ensure t
   :config
@@ -716,7 +716,7 @@ functions are working by default because tuareg is using a SMIE based
 parser. Smartparens has its own version of the navigation functions
 that are not good for ocaml yet.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (defun my/classic-parens ()
   "Disable smartparens and replace it with old school modes.
 
@@ -1232,7 +1232,7 @@ access magit.
 #+END_SRC
 ** Forge
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package forge
   :ensure t
   :after magit
@@ -1404,9 +1404,9 @@ things like tables when using ~ob-elasticsearch~.
 ** Installation
 
 Although Org mode ships with Emacs, the latest version can be installed externally. The configuration here follows the [[http://orgmode.org/elpa.html][Org mode ELPA installation instructions]].
-
 #+BEGIN_SRC emacs-lisp
 (use-package org
+  :pin "org"
   :ensure org-plus-contrib
   :bind (("C-c l" . org-store-link)
          ("C-c c" . org-capture)
@@ -1416,10 +1416,18 @@ Although Org mode ships with Emacs, the latest version can be installed external
 On Org mode version 9 I wasn't able to execute source blocks out of the box. [[https://emacs.stackexchange.com/a/28604][Others have ran into the same issue too]]. The solution is to remove the .elc files from the package directory:
 
 #+BEGIN_SRC sh :var ORG_DIR=(let* ((org-v (cadr (split-string (org-version nil t) "@"))) (len (length org-v))) (substring org-v 1 (- len 2)))
-rm ${ORG_DIR}/*.elc
+echo "removing $(ls -1 ${ORG_DIR}/*.elc | wc -l) files from ${ORG_DIR}"
+rm -f ${ORG_DIR}/*.elc
 #+END_SRC
 
 ** Org extentions installation
+
+Enable =org-tempo= to enable =<s= template expansion
+
+#+begin_src emacs-lisp
+(use-package org-tempo)
+(add-to-list 'org-structure-template-alist '("w" . "src emacs-lip"))
+#+end_src
 
 =ob-http=: curl queries from org files.
 
@@ -1679,7 +1687,7 @@ consistent as it doesn't pad source blocks with leading spaces.
 
 #+BEGIN_SRC emacs-lisp
 (add-to-list 'org-structure-template-alist
-             '("b" "#+TITLE: ?
+             '("b" . "#+TITLE: ?
 ,#+DATE: ?
 ,#+DESCRIPTION: ?
 ,#+KEYWORDS: ?
@@ -1946,6 +1954,22 @@ Dedicated windows.
   :bind ("C-c g" . deadgrep))
 #+END_SRC
 
+* SX – Stack Exchange
+
+#+BEGIN_SRC emacs-lisp
+(use-package sx
+  :bind
+  (:prefix "C-c e"
+           :prefix-map my-sx-map
+           :prefix-docstring "Global keymap for SX."
+           ("q" . sx-tab-all-questions)
+           ("i" . sx-inbox)
+           ("o" . sx-open-link)
+           ("u" . sx-tab-unanswered-my-tags)
+           ("a" . sx-ask)
+           ("s" . sx-search)))
+#+END_SRC
+
 * Utils
 
 #+BEGIN_SRC emacs-lisp
@@ -1998,10 +2022,10 @@ Dedicated windows.
 (require 'term)
 (defun visit-ansi-term ()
   "If the current buffer is:
-     1) a running ansi-term named *ansi-term*, rename it.
-     2) a stopped ansi-term, kill it and create a new one.
-     3) a non ansi-term, go to an already running ansi-term
-        or start a new one while killing a defunt one"
+       1) a running ansi-term named *ansi-term*, rename it.
+       2) a stopped ansi-term, kill it and create a new one.
+       3) a non ansi-term, go to an already running ansi-term
+	  or start a new one while killing a defunt one"
   (interactive)
   (let ((is-term (string= "term-mode" major-mode))
         (is-running (term-check-proc (buffer-name)))
@@ -2307,3 +2331,5 @@ I always forget which server is in use.
 - whole line or region https://github.com/purcell/whole-line-or-region
 - realgud debugger https://github.com/realgud/realgud
 - devdocs lookup https://github.com/skeeto/devdocs-lookup (doesn't work for ocaml)
+- sqlformat https://github.com/purcell/sqlformat
+- wgrep.el https://github.com/mhayashi1120/Emacs-wgrep

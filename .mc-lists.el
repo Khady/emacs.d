@@ -13,6 +13,7 @@
         end-of-visual-line
         evilmi-jump-items
         forward-sexp
+        helm-M-x
         indent-for-tab-command
         kill-region-or-word
         kill-visual-line
@@ -24,6 +25,7 @@
         org-self-insert-command
         org-yank
         paredit-backward
+        paredit-doublequote
         paredit-forward
         paredit-forward-delete
         paredit-forward-kill-word

@@ -44,5 +44,6 @@
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "config.org"))
+;; (load-file "~/.emacs.d/debug-config.el")
 
 (setq gc-cons-threshold (* 1 1024 1024))
