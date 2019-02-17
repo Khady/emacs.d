@@ -240,14 +240,14 @@ Install packages from github or local files.
 
 Theme of the [[https://github.com/hlissner/doom-emacs][doom emacs configuration]].
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package doom-themes
   :ensure t
   :custom
   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
   :config
-  (doom-themes-visual-bell-config) ; Enable flashing mode-line on errors
+  ; (doom-themes-visual-bell-config) ; Enable flashing mode-line on errors
   (doom-themes-org-config)         ; Corrects (and improves) org-mode's native fontification.
   )
 #+END_SRC
@@ -319,37 +319,40 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 
 Use environment variables to choose theme.
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(setq-local my/default-theme 'doom-one-light)
-(setq-local my/bad-id-theme 'whiteboard)
+#+BEGIN_SRC emacs-lisp
+(setq my/default-theme 'doom-one-light)
+(setq my/bad-id-theme 'whiteboard)
 
 (defun my/print-env-theme (kind expected)
   (message "Looking for theme %s `%s' detected from the env..." kind expected))
 
-(let ((count-themes 1)
-      (themes-ids (make-hash-table :size 30))
-      (themes-names (make-hash-table :size 30 :test #'equal))
-      (env-theme-name (getenv "EN"))
-      (env-theme-id (getenv "EI")))
-  (dolist (theme (custom-available-themes))
-    (puthash count-themes theme themes-ids)
-    (puthash (symbol-name theme) theme themes-names)
-    (setq count-themes (+ 1 count-themes)))
-  (when (or my/default-theme env-theme-name env-theme-id)
-    (setq-local
-     selected-theme
-     (if env-theme-name
-         (progn
-           (my/print-env-theme "name" env-theme-name)
-           (gethash env-theme-name themes-names my/bad-id-theme))
-       (if env-theme-id
+(defun my/load-theme ()
+  (let ((count-themes 1)
+        (themes-ids (make-hash-table :size 30))
+        (themes-names (make-hash-table :size 30 :test #'equal))
+        (env-theme-name (getenv "EN"))
+        (env-theme-id (getenv "EI")))
+    (dolist (theme (custom-available-themes))
+      (puthash count-themes theme themes-ids)
+      (puthash (symbol-name theme) theme themes-names)
+      (setq count-themes (+ 1 count-themes)))
+    (when (or my/default-theme env-theme-name env-theme-id)
+      (setq-local
+       selected-theme
+       (if env-theme-name
            (progn
-             (my/print-env-theme "id" env-theme-id)
-             (gethash (string-to-number env-theme-id) themes-ids my/bad-id-theme))
-         my/default-theme)))
-    (disable-active-themes)
-    (message "Loading theme `%s'..." selected-theme)
-    (load-theme selected-theme t)))
+             (my/print-env-theme "name" env-theme-name)
+             (gethash env-theme-name themes-names my/bad-id-theme))
+         (if env-theme-id
+             (progn
+               (my/print-env-theme "id" env-theme-id)
+               (gethash (string-to-number env-theme-id) themes-ids my/bad-id-theme))
+           my/default-theme)))
+      (disable-active-themes)
+      (message "Loading theme `%s'..." selected-theme)
+      (load-theme selected-theme t))))
+
+(my/load-theme)
 #+END_SRC
 
 ** Solaire mode
@@ -695,7 +698,7 @@ Autopair is now replaced with electric-pair-mode.
 When smartparens is not used, the classical paredit can be a good
 backup.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package paredit
   :ensure t
   :config
@@ -742,9 +745,6 @@ Util function to select where to load merlin from.
      an error"
   (car (ignore-errors (apply 'process-lines (split-string cmd)))))
 
-(setq opam-p (shell-cmd "which opam"))
-(setq reason-p (shell-cmd "which refmt"))
-(setq utop-p (shell-cmd "which utop"))
 (defun reason-cmd-where (cmd)
   (let ((where (shell-cmd cmd)))
     (if (string-equal "unknown flag ----where" where)
@@ -756,6 +756,10 @@ Util function to select where to load merlin from.
   (reason-cmd-where "refmt ----where"))
 (defun utop-where ()
   (reason-cmd-where "utop ----where"))
+
+(setq opam-p (shell-cmd "which opam"))
+(setq utop-p (shell-cmd "which utop"))
+(setq reason-npm-p (utop-where))
 #+END_SRC
 
 *** Load opam
@@ -818,7 +822,6 @@ the same as the length of ~comment-start~ to preserve indentation.
   (defun my/setup-tuareg ()
     (interactive)
     (paredit-mode)
-    (setq-local comment-continue "  ")
     (setq-local comment-style 'indent))
   :hook
   (tuareg-mode . my/setup-tuareg)
@@ -831,28 +834,39 @@ from opam.
 
 #+BEGIN_SRC emacs-lisp
 (use-package reason-mode
-  :if reason-p
   :ensure t
   :bind (:map reason-mode-map
               ("C-M-\\" . refmt))
-  :custom (refmt-width-mode 'fill)
+  :custom
+  (refmt-width-mode 'fill)
+  (refmt-command 'opam)
   :config
-  (let* ((refmt-reason (refmt-where))
-         (utop-reason (utop-where))
-         (utop-base-dir (when utop-reason
-                          (replace-regexp-in-string "bin/utop$" "" utop-reason)))
-         (merlin-reason (ocamlmerlin-where))
-         (merlin-base-dir (when merlin-reason
-                            (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
-    ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
-    (when merlin-base-dir
-      (message "loading merlin from %s" (concat merlin-base-dir "share/emacs/site-lisp/"))
-      (add-to-list 'load-path (concat merlin-base-dir "share/emacs/site-lisp/")))
-    (when utop-base-dir
-      (message "loading utop from %s" (concat utop-base-dir "share/emacs/site-lisp/"))
-      (add-to-list 'load-path (concat utop-base-dir "share/emacs/site-lisp/")))
-    (when refmt-reason
-      (setq refmt-command refmt-reason))))
+  (defun my/setup-reason-npm ()
+    "When reason tools are only available from npm and not from an
+opam switch, the configuration must be different."
+    (message "Loading reason tools from npm...")
+    (let* ((refmt-reason (refmt-where))
+           (utop-reason (utop-where))
+           (utop-base-dir (when utop-reason
+                            (replace-regexp-in-string "bin/utop$" "" utop-reason)))
+           (merlin-reason (ocamlmerlin-where))
+           (merlin-base-dir (when merlin-reason
+                              (replace-regexp-in-string "bin/ocamlmerlin$" "" merlin-reason))))
+      ;; Add npm merlin.el to the emacs load path and tell emacs where to find ocamlmerlin
+      (when merlin-base-dir
+        (message "loading merlin from %s" (concat merlin-base-dir "share/emacs/site-lisp/"))
+        (add-to-list 'load-path (concat merlin-base-dir "share/emacs/site-lisp/")))
+      (when utop-base-dir
+        (message "loading utop from %s" (concat utop-base-dir "share/emacs/site-lisp/"))
+        (add-to-list 'load-path (concat utop-base-dir "share/emacs/site-lisp/")))
+      (when refmt-reason
+        (setq refmt-command refmt-reason)))
+    (message "Loading reason tools from npm...done"))
+  (when reason-npm-p (my/setup-reason-npm))
+  (defun my/reason-npm-hook ()
+    (when reason-npm-p
+      (setq-local merlin-command (ocamlmerlin-where))))
+  :hook my/reason-npm-hook)
 #+END_SRC
 
 *** merlin
@@ -864,7 +878,7 @@ Configure merlin. Magical autocompletion and IDE features.
   :custom
   (merlin-completion-with-doc t)
   (merlin-error-check-then-move nil)
-  (merlin-command "ocamlmerlin")
+  (merlin-command 'opam)
   :custom-face
   (merlin-type-face ((t (:background "#a0bcf8"))))
   :bind (:map merlin-mode-map
@@ -927,13 +941,14 @@ point after a small delay. Provides a merlin backend to
               prompt)))
     (utop-minor-mode))
   (defun my/setup-utop-tuareg ()
-    (my/setup-utop "utop"))
+    (my/setup-utop "opam exec -- utop" "utop"))
   (defun my/setup-utop-reason ()
-    (my/setup-utop "rtop"))
-  (defun my/setup-utop-dune (&optional path)
-    (let* ((path (if path path "./"))
-           (rel-path (file-relative-name path default-directory))
-           (cmd (format "dune utop %s --" rel-path))
+    (my/setup-utop "opam exec -- rtop" "rtop"))
+  (defun my/setup-utop-dune (&optional path from)
+    (let* ((from (if from from default-directory))
+           (path (if path path default-directory))
+           (rel-path-to (file-relative-name path from))
+           (cmd (format "dune-utop.sh %S %S" from rel-path-to))
            (path-dirname (file-name-nondirectory (directory-file-name (file-name-directory path))))
            (name (format "[dune %s]" path-dirname)))
       (my/setup-utop cmd name)))
@@ -1183,10 +1198,11 @@ Same indentation rules everywhere.
 #+BEGIN_SRC emacs-lisp
 (use-package aggressive-indent
   :ensure t
-  :config
-  (global-aggressive-indent-mode 1)
-  (dolist (mode '(tuareg-mode reason-mode))
-    (add-to-list 'aggressive-indent-excluded-modes mode)))
+  ;; :config
+  ;; (global-aggressive-indent-mode 1)
+  ;; (dolist (mode '(tuareg-mode reason-mode))
+  ;;   (add-to-list 'aggressive-indent-excluded-modes mode))
+  )
 #+END_SRC
 
 * Evil
