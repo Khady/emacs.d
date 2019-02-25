@@ -366,9 +366,9 @@ brighter -- background.
 (use-package solaire-mode
   :ensure t
   :hook
-  (after-change-major-mode-hook . turn-on-solaire-mode)
-  (after-revert-hook . turn-on-solaire-mode)
-  (minibuffer-setup-hook . solaire-mode-in-minibuffer)
+  (after-change-major-mode . turn-on-solaire-mode)
+  (after-revert . turn-on-solaire-mode)
+  (minibuffer-setup . solaire-mode-in-minibuffer)
   :config
   (solaire-mode-swap-bg))
 #+END_SRC
@@ -565,7 +565,7 @@ echo area. Usually it is the signature of a function.
 #+BEGIN_SRC emacs-lisp
 (use-package eldoc
   :ensure t
-  :hook (eval-expression-minibuffer-setup-hook . eldoc-mode))
+  :hook (eval-expression-minibuffer-setup . eldoc-mode))
 #+END_SRC
 
 Display eldoc message in an overlay instead of echo area.
@@ -575,7 +575,7 @@ Display eldoc message in an overlay instead of echo area.
   :ensure t)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package eldoc-box
   :if (version<= "26.0" emacs-version)
   :quelpa ((eldoc-box :fetcher github :repo "casouri/eldoc-box"))
@@ -709,7 +709,8 @@ on whether or not a region is selected."
     (if (and transient-mark-mode mark-active)
         (paredit-kill-region (point) (mark))
       (paredit-backward-kill-word)))
-  :hook (emacs-lisp-mode . paredit-mode))
+  :hook
+  ((emacs-lisp-mode dune-mode tuareg-mode) . paredit-mode))
 #+END_SRC
 
 For some modes like tuareg, I prefer to not use smartparens because it
@@ -821,11 +822,9 @@ the same as the length of ~comment-start~ to preserve indentation.
   (load "tuareg-site-file")
   (defun my/setup-tuareg ()
     (interactive)
-    (paredit-mode)
     (setq-local comment-style 'indent))
   :hook
-  (tuareg-mode . my/setup-tuareg)
-  (tuareg-dune-mode . paredit-mode))
+  (tuareg-mode . my/setup-tuareg))
 #+END_SRC
 
 When using ~reason-mode~, we want to load merlin from
@@ -866,7 +865,7 @@ opam switch, the configuration must be different."
   (defun my/reason-npm-hook ()
     (when reason-npm-p
       (setq-local merlin-command (ocamlmerlin-where))))
-  :hook my/reason-npm-hook)
+  :hook (reason-mode . my/reason-npm-hook))
 #+END_SRC
 
 *** merlin
@@ -1116,6 +1115,7 @@ Python has a big jedi package to have completion and many other nice things.
 
 #+BEGIN_SRC emacs-lisp
 (use-package macrostep
+  :ensure t
   :bind ("C-c e m" . macrostep-expand))
 #+END_SRC
 
