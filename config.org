@@ -873,7 +873,7 @@ opam switch, the configuration must be different."
 
 Configure merlin. Magical autocompletion and IDE features.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package merlin
   :custom
   (merlin-completion-with-doc t)
@@ -981,6 +981,21 @@ now, so this is not enabled by default.
 
 ~ocaml-language-server~ has to be in the path. It can be installed
 with yarn global. It will be in ~yarn global bin~.
+
+#+begin_src emacs-lisp
+(use-package helm-lsp :ensure t)
+(use-package lsp-ui :ensure t)
+(use-package company-lsp :ensure t)
+(require 'company-lsp)
+(push 'company-lsp company-backends)
+(use-package lsp-mode
+  :ensure t
+  :config
+  (lsp-register-client
+   (make-lsp-client :new-connection (lsp-stdio-connection '("/home/louis/.opam/a/bin/ocamlmerlin-lsp"))
+                    :major-modes '(tuareg-mode)
+                    :server-id 'ocamlmerlin-lsp)))
+#+end_src
 
 #+BEGIN_SRC fish
 yarn global add ocaml-language-server
