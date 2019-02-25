@@ -21,3 +21,4 @@
 /custom.el
 /.sx
 /transient
+/.lsp-session-*
