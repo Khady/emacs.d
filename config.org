@@ -617,7 +617,7 @@ Popup for documentation or help
 * Parentheses
 
 Rainbow delimiters, to have a different color for each level of
-=([{=.
+=([{}])=.
 
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
