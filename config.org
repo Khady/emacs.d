@@ -816,7 +816,9 @@ the same as the length of ~comment-start~ to preserve indentation.
   :mode (("\\.ml[ily]?$" . tuareg-mode)
          ("\\.topml$" . tuareg-mode)
          ("\\.ocamlinit$" . tuareg-mode)
-         ("dune" . tuareg-dune-mode))
+         ("^dune$" . dune-mode)
+         ("^dune-project$" . dune-mode)
+         ("^dune-workspace$" . dune-mode))
   :config
   (unbind-key "<backspace>" tuareg-mode-map)
   (load "tuareg-site-file")
@@ -961,6 +963,15 @@ point after a small delay. Provides a merlin backend to
 #+BEGIN_SRC emacs-lisp
 (use-package dune-flymake)
 (use-package dune)
+#+END_SRC
+
+*** ocamlformat
+
+#+BEGIN_SRC emacs-lisp
+(use-package ocamlformat
+  :commands (ocamlformat ocamlformat-before-save)
+  :bind (:map tuareg-mode-map
+              ("M-<iso-lefttab>" . ocamlformat)))
 #+END_SRC
 
 *** lsp
@@ -1442,7 +1453,7 @@ Enable =org-tempo= to enable =<s= template expansion
 
 #+begin_src emacs-lisp
 (use-package org-tempo)
-(add-to-list 'org-structure-template-alist '("w" . "src emacs-lip"))
+(add-to-list 'org-structure-template-alist '("w" . "src emacs-lisp"))
 #+end_src
 
 =ob-http=: curl queries from org files.
