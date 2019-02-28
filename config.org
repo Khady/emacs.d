@@ -526,27 +526,11 @@ file not under a ~.envrc~ file the env will be lost in this file.
 * Flymake
 
 #+BEGIN_SRC emacs-lisp
-(defun next-flymake-error ()
-  (interactive)
-  (let ((err-buf nil))
-    (condition-case err
-        (setq err-buf (next-error-find-buffer))
-      (error))
-    (if err-buf
-        (next-error)
-      (progn
-        (flymake-goto-next-error)
-        (let ((err (get-char-property (point) 'help-echo)))
-          (when err
-            (message err)))))))
-
 (use-package flymake
   :ensure t
   :bind
-  ("C-c <f8>" . flymake-mode)
-  ("C-c <f7>" . next-flymake-error)
-  ("C-c <f6>"  . flymake-goto-next-error)
-  ("<f7>" . next-error))
+  ("<f7>"  . flymake-goto-prev-error)
+  ("<f8>"  . flymake-goto-next-error))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -597,7 +581,7 @@ I use company mode as a completion backend
   (company-idle-delay nil)
   (company-tooltip-align-annotations t)
   :hook
-  ((prog-mode utop-mode) . company-mode)
+  (prog-mode . company-mode)
   :config
   (company-quickhelp-mode 1)
   :bind
@@ -883,6 +867,7 @@ Configure merlin. Magical autocompletion and IDE features.
   (merlin-completion-with-doc t)
   (merlin-error-check-then-move nil)
   (merlin-command 'opam)
+  (merlin-error-after-save nil)
   :custom-face
   ;; (merlin-type-face ((t (:background "firebrick")))) ;; doom-one
   (merlin-type-face ((t (:background "#a0bcf8")))) ;; doom-one-light
@@ -916,6 +901,7 @@ point after a small delay. Provides a merlin backend to
 #+BEGIN_SRC emacs-lisp
 (use-package merlin-eldoc
   ;; :load-path "/home/louis/Code/github/merlin-eldoc"
+  :disabled
   :ensure t
   :custom
   (eldoc-echo-area-use-multiline-p t)
@@ -1017,8 +1003,8 @@ This is done by comparing font face.  So a mode such as
 `tuareg-mode' or `reason-mode' must be activated in the buffer
 before to call this function."
   (my/merlin-lsp--current-font-among-fonts-p pos '(font-lock-comment-face
-                                                     font-lock-comment-delimiter-face
-                                                     font-lock-doc-face)))
+                                                   font-lock-comment-delimiter-face
+                                                   font-lock-doc-face)))
 
 (defun my/merlin-lsp--in-string-p (pos)
   "Return non-nil if character at POS is string.
@@ -1033,7 +1019,7 @@ This is done by comparing font face.  So a mode such as
 `tuareg-mode' or `reason-mode' must be activated in the buffer
 before to call this function."
   (my/merlin-lsp--current-font-among-fonts-p pos '(tuareg-font-lock-governing-face
-                                                     font-lock-keyword-face)))
+                                                   font-lock-keyword-face)))
 
 (defun my/merlin-lsp--in-operator-p (pos)
   "Return non-nil if character at POS is operator.
@@ -1070,10 +1056,9 @@ before to call this function."
   (push 'company-lsp company-backends))
 (use-package lsp-mode
   :ensure t
-  :custom
+  ;; :custom
   ;; (lsp-print-io t)
   ;; (lsp-trace t)
-  (lsp-eldoc-render-all nil)
   :config
   (lsp-register-client
    (make-lsp-client
@@ -1085,7 +1070,8 @@ before to call this function."
     (when (my/merlin-lsp--valid-type-position-p (point))
       (lsp-hover)))
   (defun my/merlin-lsp-setup-eldoc ()
-    (setq-local lsp-eldoc-hook '(my/merlin-lsp--on-hover)))
+    (setq-local lsp-eldoc-hook (remove 'lsp-hover lsp-eldoc-hook))
+    (push 'my/merlin-lsp--on-hover lsp-eldoc-hook))
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-references] . lsp-ui-peek-find-references))
   :hook

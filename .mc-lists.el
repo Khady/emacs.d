@@ -45,6 +45,7 @@
         tuareg-comment-dwim
         tuareg-electric-pipe
         tuareg-indent-phrase
+        typescript-insert-and-autoconvert-to-template
         typescript-insert-and-indent
         yaml-electric-dash-and-dot
         ))
