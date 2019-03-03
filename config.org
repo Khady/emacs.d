@@ -86,6 +86,9 @@ Mai]] and [[https://github.com/technomancy/better-defaults][Better defaults]].
 (setq apropos-do-all t)
 
 (setq mouse-yank-at-point t)
+
+;; all files must have a newline at the end
+(setq require-final-newline t)
 #+END_SRC
 
 *** Backups
@@ -107,15 +110,12 @@ is cheap. Save lots.
 Save point position between sessions
 
 #+BEGIN_SRC emacs-lisp
-(setq dotfiles-dir (file-name-directory
-                    (or (buffer-file-name) load-file-name)))
 (use-package saveplace
   :custom
-  (save-place-file (expand-file-name ".places" dotfiles-dir))
+  (save-place-file (expand-file-name ".places" user-emacs-directory))
   (save-place t)
   :config
-  (save-place-mode 1)
-  )
+  (save-place-mode 1))
 #+END_SRC
 
 *** Autorevert
@@ -478,7 +478,6 @@ ibuffer is the improved version of list-buffers.
 (defalias 'list-buffers 'ibuffer)
 #+END_SRC
 
-
 source: http://ergoemacs.org/emacs/emacs_buffer_management.html
 
 #+BEGIN_SRC emacs-lisp
@@ -509,20 +508,6 @@ source: http://ergoemacs.org/emacs/emacs_buffer_management.html
   :ensure t)
 #+END_SRC
 
-* Direnv
-
-This direnv package works per file. It means that it will edit the
-env each time the focus change from one file to another. Which also
-mean that if a function like ~merlin-locate~ makes one jump into a
-file not under a ~.envrc~ file the env will be lost in this file.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package direnv
-  :ensure t
-  :config
-  (direnv-mode))
-#+END_SRC
-
 * Flymake
 
 #+BEGIN_SRC emacs-lisp
@@ -550,13 +535,6 @@ echo area. Usually it is the signature of a function.
 (use-package eldoc
   :ensure t
   :hook (eval-expression-minibuffer-setup . eldoc-mode))
-#+END_SRC
-
-Display eldoc message in an overlay instead of echo area.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package eldoc-overlay
-  :ensure t)
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -594,8 +572,7 @@ Popup for documentation or help
 (use-package company-quickhelp
   :ensure t
   :bind (:map company-active-map
-              ("M-h" . company-quickhelp-manual-begin))
-  )
+              ("M-h" . company-quickhelp-manual-begin)))
 #+END_SRC
 
 * Parentheses
@@ -608,41 +585,6 @@ Rainbow delimiters, to have a different color for each level of
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
-
-Smartparens aims to be a replacement for electric-pair-mode, paren,
-autopair, paredit and other modes dedicated to balancing of
-delimiters. It is supposed to be more powerful and work in every mode.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package smartparens
-  :ensure t
-  :config
-  (defun my/enable-smartparens-prog ()
-    "Enable all smartparens mode."
-    (interactive)
-    (smartparens-mode)
-    (smartparens-strict-mode)
-    (show-smartparens-mode)
-    (sp-use-smartparens-bindings)
-    (require 'smartparens-config))
-  (defun my/enable-smartparens-text ()
-    "Enable minimal smartparens mode without any keybinding."
-    (interactive)
-    (smartparens-mode)
-    (show-smartparens-mode))
-  (defun sp-kill-region-or-word ()
-    "Call `sp-kill-region' or `sp-backward-kill-word' depending
-on whether or not a region is selected."
-    (interactive)
-    (if (and transient-mark-mode mark-active)
-        (sp-kill-region (point) (mark))
-      (sp-backward-kill-word 1)))
-  :custom-face (sp-show-pair-match-content-face ((t (:inherit sp-show-pair-match-face))))
-  :bind (:map smartparens-strict-mode-map ("C-w" . sp-kill-region-or-word)))
-#+END_SRC
-
-~show-paren-mode~ is smarter than smartparens to highlight between
-keywords that are detected by SMIE.
 
 #+BEGIN_SRC emacs-lisp
 (use-package paren
@@ -665,7 +607,7 @@ trick can be used.
 
 (defun show-paren-local-mode ()
   (interactive)
-  (make-local-variable 'show-paren-mode) ;; The value of shom-paren-mode will be local to this buffer.
+  (make-local-variable 'show-paren-mode)
   (setq show-paren-mode t))
 
 (add-hook 'prog-mode-hook #'show-paren-local-mode)
@@ -678,9 +620,6 @@ Autopair is now replaced with electric-pair-mode.
   :ensure t
   :config (electric-pair-mode))
 #+END_SRC
-
-When smartparens is not used, the classical paredit can be a good
-backup.
 
 #+BEGIN_SRC emacs-lisp
 (use-package paredit
@@ -696,27 +635,6 @@ on whether or not a region is selected."
   (unbind-key "M-?" paredit-mode-map)
   :hook
   ((emacs-lisp-mode dune-mode tuareg-mode) . paredit-mode))
-#+END_SRC
-
-For some modes like tuareg, I prefer to not use smartparens because it
-doesn't handle the pair of keywords well. Paredit doesn't handle them
-either, but it doesn't affect the default navigation function. Those
-functions are working by default because tuareg is using a SMIE based
-parser. Smartparens has its own version of the navigation functions
-that are not good for ocaml yet.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(defun my/classic-parens ()
-  "Disable smartparens and replace it with old school modes.
-
-show-paren-mode + paredit + electric-pair-local-mode"
-  (interactive)
-  (smartparens-strict-mode -1)
-  (smartparens-mode -1)
-  (show-smartparens-mode -1)
-  (show-paren-mode 1)
-  (electric-pair-local-mode)
-  (paredit-mode))
 #+END_SRC
 
 * Programming languages
@@ -1085,49 +1003,26 @@ before to call this function."
 yarn global add ocaml-language-server
 #+END_SRC
 
-** Typescript
+*** dir locals
 
-#+BEGIN_SRC emacs-lisp
-(use-package tide
-  :ensure t
-  :bind (:map tide-mode-map
-              ("M-?" . tide-references)
-              ("C-c C-e" . tide-rename-symbol)
-              ("C-c C-x" . flycheck-next-error))
-  :init
-  (defun my/setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save mode-enabled idle-change))
-    ;; (flycheck-add-next-checker 'typescript-tide '(t . typescript-tslint) 'append)
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    ;; company is an optional dependency. You have to
-    ;; install it separately via package-install
-    ;; `M-x package-install [ret] company`
-    (company-mode +1))
-  :hook
-  ((typescript-mode js2-mode) . my/setup-tide-mode))
-  ;; (add-hook 'typescript-mode-hook #'setup-tide-mode)
-  ;; (add-hook 'js2-mode-hook #'setup-tide-mode))
+Then it is possible to create a ~.dir-locals.el~ file to setup
+compilation and utop commands.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+((nil
+  (eval progn
+        (require 'projectile)
+        (puthash
+         (projectile-project-root)
+         "make -C backend/api byte" projectile-compilation-cmd-map)))
+ ("src"
+  (tuareg-mode
+   (eval progn
+         (my/setup-utop-dune
+          (format "%sbackend/api/src/" (projectile-project-root)))))))
 #+END_SRC
 
 ** Javascript
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package indium
-  :ensure t)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(use-package js2-mode
-  :ensure t
-  :mode "\\.js\\'"
-  :custom
-  (js-indent-level 2)
-  )
-#+END_SRC
 
 #+BEGIN_SRC emacs-lisp
 (use-package web-mode
@@ -1156,15 +1051,6 @@ Based on [[https://emacs.cafe/emacs/guest-post/2017/06/26/hierarchy.html][hierar
   :ensure t)
 
 (use-package json-navigator
-  :ensure t)
-#+END_SRC
-
-** Python
-
-Python has a big jedi package to have completion and many other nice things.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package jedi
   :ensure t)
 #+END_SRC
 
@@ -1238,34 +1124,15 @@ I use fish as a shell
 
 #+BEGIN_SRC emacs-lisp
 (use-package fish-completion
-  :ensure t
-  :config (when (and (executable-find "fish")
-                     (require 'fish-completion nil t))
-            (global-fish-completion-mode)))
+  :ensure t)
+(when (and (executable-find "fish")
+           (require 'fish-completion nil t))
+  (global-fish-completion-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
 (use-package fish-mode
   :ensure t)
-#+END_SRC
-
-*** dir locals
-
-Then it is possible to create a ~.dir-locals.el~ file to setup
-compilation and utop commands.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-((nil
-  (eval progn
-        (require 'projectile)
-        (puthash
-         (projectile-project-root)
-         "make -C backend/api byte" projectile-compilation-cmd-map)))
- ("src"
-  (tuareg-mode
-   (eval progn
-         (my/setup-utop-dune
-          (format "%sbackend/api/src/" (projectile-project-root)))))))
 #+END_SRC
 
 * Whitespace
@@ -1278,8 +1145,7 @@ compilation and utop commands.
   (whitespace-style '(face empty tabs lines-tail trailing))
   (whitespace-line-column 160)
   :config
-  (global-whitespace-mode t)
-  )
+  (global-whitespace-mode t))
 #+END_SRC
 
 * Editorconfig
@@ -1303,26 +1169,6 @@ Same indentation rules everywhere.
   ;; (dolist (mode '(tuareg-mode reason-mode))
   ;;   (add-to-list 'aggressive-indent-excluded-modes mode))
   )
-#+END_SRC
-
-* Evil
-
-I will use it, one day... For now it is used to jump from opening
-to closing keywords in ocaml.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package evil
-  :ensure t)
-#+END_SRC
-
-When jumping between sexp does not work, it might be useful to use
-this ~evil-matchit~ package. It contains some bugs for ocaml.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package evil-matchit
-  :ensure t
-  :config (global-evil-matchit-mode 1)
-  :bind ("C-%" . evilmi-jump-items))
 #+END_SRC
 
 * Git
@@ -1358,17 +1204,6 @@ access magit.
                  "git.ahrefs.com/api"
                  "git.ahrefs.com"
                  forge-github-repository)))
-#+END_SRC
-
-** Magithub
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package magithub
-  :after magit
-  :ensure t
-  :config
-  ; (add-to-list 'magithub-github-hosts "git.ahrefs.com")
-  (magithub-feature-autoinject t))
 #+END_SRC
 
 ** git links
@@ -1407,8 +1242,7 @@ from ~git-gutter-fringe~.
   (set-face-foreground 'git-gutter-fr:modified "yellow")
   (set-face-foreground 'git-gutter-fr:added    "blue")
   (set-face-foreground 'git-gutter-fr:deleted  "white")
-  (global-git-gutter-mode)
-  )
+  (global-git-gutter-mode))
 #+END_SRC
 
 ** Github
@@ -1423,21 +1257,6 @@ bother with other packages?
   :custom (git-link-use-commit 't)
   :config (add-to-list 'git-link-remote-alist
                '("git\\.ahrefs\\.com" git-link-github)))
-#+END_SRC
-
-* Mercurial
-** Monky
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package monky
-  :ensure t)
-#+END_SRC
-
-** ahg
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package ahg
-  :ensure t)
 #+END_SRC
 
 * Helm
@@ -1826,19 +1645,6 @@ consistent as it doesn't pad source blocks with leading spaces.
   :ensure t)
 #+END_SRC
 
-* Expand region
-
-Expand region increases the selected region by semantic units. Just
-keep pressing the key until it selects what you want.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package expand-region
-  :ensure t
-  :bind
-  ("C-=" . 'er/expand-region)
-  )
-#+END_SRC
-
 * Multiple cursors
 
 #+BEGIN_SRC emacs-lisp
@@ -1846,8 +1652,7 @@ keep pressing the key until it selects what you want.
   :ensure t
   :bind
   ("C-<" . mc/mark-previous-like-this)
-  ("C->" . mc/mark-next-like-this)
-  )
+  ("C->" . mc/mark-next-like-this))
 #+END_SRC
 
 * Linum
@@ -1926,8 +1731,7 @@ I never took time to really use this...
   :ensure t
   :diminish
   :config
-  (global-undo-tree-mode)
-  )
+  (global-undo-tree-mode))
 #+END_SRC
 
 * Big files/lines
@@ -2100,76 +1904,6 @@ Dedicated windows.
   (interactive)
   (mapc 'kill-buffer (buffer-list)))
 
-(defun close-code-buffers ()
-  (interactive)
-  (mapc (lambda (b)
-          (unless (string-match "*" (buffer-name b))
-            (kill-buffer b)
-            )
-          ) (buffer-list)))
-
-(defun create-ocaml-buffers ()
-  (interactive)
-  (delete-other-windows)
-
-  (setq total-window-size (window-width (frame-selected-window)))
-  (setq total-window-height (window-height (frame-selected-window)))
-
-  (split-window-vertically)
-  (other-window 1)
-  (switch-to-buffer (get-buffer-create "*merlin-types*"))
-  (setq second-window-height (window-height (frame-selected-window)))
-  (setq expected-window-height (* 0.10 total-window-height))
-  (setq expand-window-height (- expected-window-height second-window-height))
-  (enlarge-window (round expand-window-height))
-  (toggle-window-dedicated)
-
-  (split-window-horizontally)
-  (other-window 1)
-  (switch-to-buffer (get-buffer-create "*merlin-occurrences*"))
-  (setq second-window-size (window-width (frame-selected-window)))
-  (setq expected-window-size (* 0.65 total-window-size))
-  (setq expand-window-size (- expected-window-size second-window-size))
-  (enlarge-window-horizontally (round expand-window-size))
-  (toggle-window-dedicated)
-
-  (split-window-horizontally)
-  (other-window 1)
-  (switch-to-buffer (get-buffer-create "*compilation*"))
-  (compilation-mode)
-  (toggle-window-dedicated)
-
-  (other-window 1)
-  )
-
-(require 'term)
-(defun visit-ansi-term ()
-  "If the current buffer is:
-       1) a running ansi-term named *ansi-term*, rename it.
-       2) a stopped ansi-term, kill it and create a new one.
-       3) a non ansi-term, go to an already running ansi-term
-	  or start a new one while killing a defunt one"
-  (interactive)
-  (let ((is-term (string= "term-mode" major-mode))
-        (is-running (term-check-proc (buffer-name)))
-        (term-cmd "/usr/bin/fish")
-        (anon-term (get-buffer "*ansi-term*")))
-    (if is-term
-        (if is-running
-            (if (string= "*ansi-term*" (buffer-name))
-                (call-interactively 'rename-buffer)
-              (if anon-term
-                  (switch-to-buffer "*ansi-term*")
-                (ansi-term term-cmd)))
-          (kill-buffer (buffer-name))
-          (ansi-term term-cmd))
-      (if anon-term
-          (if (term-check-proc "*ansi-term*")
-              (switch-to-buffer "*ansi-term*")
-            (kill-buffer "*ansi-term*")
-            (ansi-term term-cmd))
-        (ansi-term term-cmd)))))
-
 (defun kill-region-or-word ()
   "Call `kill-region' or `backward-kill-word' depending on
 whether or not a region is selected."
@@ -2177,7 +1911,6 @@ whether or not a region is selected."
   (if (and transient-mark-mode mark-active)
       (kill-region (point) (mark))
     (backward-kill-word 1)))
-(global-set-key "\C-w" 'kill-region-or-word)
 
 (defun buffer-same-mode (change-buffer-fun)
   (let ((current-mode major-mode)
@@ -2193,183 +1926,6 @@ whether or not a region is selected."
 (defun next-buffer-same-mode ()
   (interactive)
   (buffer-same-mode #'next-buffer))
-
-;; Remove "<clone>" from a name if present.
-(defun get-clone-original-name (name)
-  (let ((clone "<clone>"))
-    (let
-        (
-         (clen (length clone))
-         (nlen (length name))
-         )
-      (if
-          (and
-           (>= nlen clen)
-           (string= clone (substring name (- clen) nil)))
-          (substring name 0 (- nlen clen))
-        name))))
-
-;; F12: clone the current buffer
-;; If a clone already exists, use it.
-(global-set-key
- [(f12)]
- (lambda () (interactive)
-   ;; Get the name of the buffer and its clone.
-   (let ((original-name (get-clone-original-name (buffer-name))))
-     (let ((clone-name (concat original-name "<clone>")))
-       ;; Remember whether the current buffer is the clone.
-       (let ((was-clone (string= (buffer-name) clone-name)))
-         (if
-             (not was-clone)
-             ;; Kill the current clone to avoid having two of them and to reset
-             ;; its position to the current position.
-             (progn
-               (if
-                   (get-buffer clone-name)
-                   (kill-buffer clone-name))
-               (make-indirect-buffer original-name clone-name 1)))
-         (switch-to-buffer clone-name)
-         )))))
-
-;; Alt-F12: clone the current buffer in a window on the right.
-;; If a clone already exists, use it.
-(global-set-key
- [(meta f12)]
- (lambda () (interactive)
-   ;; Get the name of the buffer and its clone.
-   (let ((original-name (get-clone-original-name (buffer-name))))
-     (let ((clone-name (concat original-name "<clone>")))
-       ;; Remember whether the current buffer is the clone.
-       (let ((was-clone (string= (buffer-name) clone-name)))
-         ;; Split and set the left buffer.
-         (delete-other-windows)
-         (split-window-horizontally)
-         (switch-to-buffer original-name)
-         (other-window 1)
-         (if
-             (not was-clone)
-             ;; Kill the current clone to avoid having two of them and to reset
-             ;; its position to the current position.
-             (progn
-               (if
-                   (get-buffer clone-name)
-                   (kill-buffer clone-name))
-               (make-indirect-buffer original-name clone-name 1)))
-         (switch-to-buffer clone-name)
-         ;; Go back to the left.
-         (other-window 1))))))
-
-;; F11: switch between clone and original
-(global-set-key
- [f11]
- (lambda () (interactive)
-   ;; Get the name of the buffer and its clone.
-   (let ((original-name (get-clone-original-name (buffer-name))))
-     (let ((clone-name (concat original-name "<clone>")))
-       ;; Test whether the current buffer is the clone.
-       (if (string= (buffer-name) clone-name)
-           (switch-to-buffer original-name)
-         (switch-to-buffer clone-name))))))
-
-;; Insert \n(********)\n(* Title *)\n(********)\n
-(defun insert-ocaml-section-string (title)
-  "Insert a commented OCaml section title at point"
-  (interactive "*sSection title: ")
-  (let
-      ((title
-        (replace-regexp-in-string
-         "\\(\n\\)"
-         "" title)))
-    (insert
-     "\n(***************************************"
-     "***************************************)\n(* ")
-    (insert (make-string (- 37 (/ (length title) 2)) ? ))
-    (insert title)
-    (insert
-     (make-string
-      (-
-       (- 37 (/ (length title) 2))
-       (% (length title) 2))
-      ? ))
-    (insert
-     " *)\n(***************************************"
-     "***************************************)\n")))
-
-;; Surround region by \n(********)\n(* Title *)\n(********)\n
-(defun insert-ocaml-section-region (start end)
-  "Insert a commented OCaml section title around region"
-  (interactive "*r")
-  (let ((string (buffer-substring start end)))
-    (delete-region start end)
-    (insert-ocaml-section-string string)))
-
-;; Insert ##### Title #####
-(defun insert-upl-section-string (title)
-  "Insert a commented UPL section title at point"
-  (interactive "*sSection title: ")
-  (let
-      ((title
-        (replace-regexp-in-string
-         "\\(\n\\|#+ +\\| +#+\\)"
-         "" title)))
-    (insert (make-string (- 39 (/ (length title) 2)) 35 ))
-    (insert " ")
-    (insert title)
-    (insert " ")
-    (insert
-     (make-string
-      (-
-       (- 39 (/ (length title) 2))
-       (% (length title) 2))
-      35 ))
-    ))
-
-;; Surround region by ##### ... #####
-(defun insert-upl-section-region (start end)
-  "Insert a commented UPL section title around region"
-  (interactive "*r")
-  (let ((string (buffer-substring start end)))
-    (delete-region start end)
-    (insert-upl-section-string string)))
-
-(defun insert-section-region (start end)
-  "Insert a commented section title around region"
-  (interactive "*r")
-  (let ((string (buffer-substring start end)))
-    (if (derived-mode-p 'tuareg-mode)
-        (insert-ocaml-section-region start end)
-      (insert-upl-section-region start end))
-    )
-  )
-
-;; Get the contents of the current line
-;; (let (p1 p2 myLine)
-;;   (setq p1 (line-beginning-position) )
-;;   (setq p2 (line-end-position) )
-;;   (setq myLine (buffer-substring-no-properties p1 p2))
-;; )
-
-(defun insert-section-line ()
-  "Insert a commented section title around line"
-  (interactive "*")
-  (beginning-of-line)
-  (let ((beg (point)))
-    (end-of-line)
-    (insert-section-region beg (point)))
-  )
-
-(defun resize-window ()
-  (interactive "*")
-  (setq current-window-size (window-width (frame-selected-window)))
-  (if (>= 80 current-window-size)
-      (setq change-window-size (- current-window-size 80))
-    (setq change-window-size (- 80 current-window-size))
-    )
-  (enlarge-window change-window-size)
-  )
-
-(global-set-key
- [(meta f11)] 'resize-window)
 #+END_SRC
 
 * Kill ring
@@ -2439,12 +1995,13 @@ I always forget which server is in use.
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(bind-key "C-c j" 'replace-string)
-(bind-key "C-c x" 'close-all-buffers)
-(bind-key "C-c k" 'kill-this-buffer)
+(bind-key "C-c j" #'replace-string)
+(bind-key "C-c x" #'close-all-buffers)
+(bind-key "C-c k" #'kill-this-buffer)
+(bind-key "C-w" #'kill-region-or-word)
 
-(bind-key "C-S-<iso-lefttab>" 'previous-buffer-same-mode)
-(bind-key "C-<tab>" 'next-buffer-same-mode)
+(bind-key "C-S-<iso-lefttab>" #'previous-buffer-same-mode)
+(bind-key "C-<tab>" #'next-buffer-same-mode)
 #+END_SRC
 
 * Todolist
