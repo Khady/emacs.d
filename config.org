@@ -925,7 +925,8 @@ point after a small delay. Provides a merlin backend to
   :if utop-p
   :diminish utop-minor-mode
   :custom (utop-edit-command t)
-  :config
+  :commands (utop-minor-mode)
+  :init
   (defun my/setup-utop (cmd &optional name)
     (setq my/utop-name (if name name cmd))
     (setq utop-command (format "%s -emacs" cmd))
@@ -935,6 +936,7 @@ point after a small delay. Provides a merlin backend to
               (add-text-properties 0 (length prompt) '(face utop-prompt) prompt)
               prompt)))
     (utop-minor-mode))
+
   (defun my/setup-utop-tuareg ()
     (my/setup-utop "opam exec -- utop" "utop"))
   (defun my/setup-utop-reason ()
@@ -1039,8 +1041,8 @@ before to call this function."
          (not comment)
          (or (not keyword) string))))
 
-
-(use-package helm-lsp :ensure t)
+(use-package helm-lsp
+  :ensure t)
 (use-package lsp-ui
   :ensure t
   :custom
@@ -1063,7 +1065,7 @@ before to call this function."
   (lsp-register-client
    (make-lsp-client
     :new-connection (lsp-stdio-connection
-                     (lambda () (opam-which "ocamlmerlin-lsp")))
+                     '("opam" "exec" "--" "ocamlmerlin-lsp"))
     :major-modes '(caml-mode tuareg-mode reason-mode)
     :server-id 'ocamlmerlin-lsp))
   (defun my/merlin-lsp--on-hover ()
@@ -1517,7 +1519,10 @@ things like tables when using ~ob-elasticsearch~.
 * Org mode
 ** Installation
 
-Although Org mode ships with Emacs, the latest version can be installed externally. The configuration here follows the [[http://orgmode.org/elpa.html][Org mode ELPA installation instructions]].
+Although Org mode ships with Emacs, the latest version can be
+installed externally. The configuration here follows the [[http://orgmode.org/elpa.html][Org mode ELPA
+installation instructions]].
+
 #+BEGIN_SRC emacs-lisp
 (use-package org
   :pin "org"
@@ -1527,7 +1532,9 @@ Although Org mode ships with Emacs, the latest version can be installed external
          ("C-c a" . org-agenda)))
 #+END_SRC
 
-On Org mode version 9 I wasn't able to execute source blocks out of the box. [[https://emacs.stackexchange.com/a/28604][Others have ran into the same issue too]]. The solution is to remove the .elc files from the package directory:
+On Org mode version 9 I wasn't able to execute source blocks out of
+the box. [[https://emacs.stackexchange.com/a/28604][Others have ran into the same issue too]]. The solution is to
+remove the .elc files from the package directory:
 
 #+BEGIN_SRC sh :var ORG_DIR=(let* ((org-v (cadr (split-string (org-version nil t) "@"))) (len (length org-v))) (substring org-v 1 (- len 2)))
 echo "removing $(ls -1 ${ORG_DIR}/*.elc | wc -l) files from ${ORG_DIR}"
@@ -1740,8 +1747,10 @@ languages. Not enabled.
            (string= lang "java")
            (string= lang "python")
            (string= lang "emacs-lisp")
+           (string= lang "bash")
+           (string= lang "sh")
            (string= lang "sqlite"))))
-(setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+(setq org-confirm-babel-evaluate #'my-org-confirm-babel-evaluate)
 #+END_SRC
 
 ** Org babel/source blocks
