@@ -493,7 +493,9 @@ source: http://ergoemacs.org/emacs/emacs_buffer_management.html
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :ensure t
-  :init (setq projectile-keymap-prefix (kbd "C-c p"))
+  :bind (:map projectile-mode-map
+              ("C-c p" . projectile-command-map)
+              ("<f6>" . projectile-compile-project))
   :custom
   (projectile-completion-system 'helm)
   (projectile-enable-caching t)
@@ -891,22 +893,6 @@ point after a small delay. Provides a merlin backend to
 
 *** lsp
 
-It is possible to use the ~ocaml-language-server~, which is a lsp
-server for ocaml and reason, rather than calling merlin directly. It
-also comes with some nice UI if ~lsp-ui~ is installed.
-
-I find it not as complete or neat than using merlin + merlin-eldoc for
-now, so this is not enabled by default.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package lsp-ocaml
-  :ensure t
-  :hook (tuareg-mode . lsp-ocaml-enable))
-#+END_SRC
-
-~ocaml-language-server~ has to be in the path. It can be installed
-with yarn global. It will be in ~yarn global bin~.
-
 #+begin_src emacs-lisp
 (defun my/merlin-lsp--current-font-among-fonts-p (pos fonts)
   "If current font at POS is among FONTS."
@@ -965,7 +951,6 @@ before to call this function."
   :ensure t
   :custom
   (lsp-ui-doc-position 'bottom)
-  (lsp-ui-doc-header t)
   (lsp-ui-sideline-enable nil)
   (lsp-ui-peek-peek-height 5))
 (use-package company-lsp
@@ -977,7 +962,6 @@ before to call this function."
 (use-package lsp-mode
   :ensure t
   :custom
-  (lsp-auto-guess-root t)
   (lsp-log-max 100000)
   :config
   (lsp-register-client
