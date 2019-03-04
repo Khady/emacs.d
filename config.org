@@ -869,7 +869,8 @@ point after a small delay. Provides a merlin backend to
       (my/setup-utop cmd name)))
   :hook
   (tuareg-mode . my/setup-utop-tuareg)
-  (reason-mode . my/setup-utop-reason))
+  (reason-mode . my/setup-utop-reason)
+  (utop-minor-mode . (lambda () (setq company-backends (remove 'utop-company-backend company-backends)))))
 #+END_SRC
 
 *** Dune
@@ -959,8 +960,7 @@ before to call this function."
          (not comment)
          (or (not keyword) string))))
 
-(use-package helm-lsp
-  :ensure t)
+(use-package helm-lsp :ensure t)
 (use-package lsp-ui
   :ensure t
   :custom
@@ -976,9 +976,9 @@ before to call this function."
   (push 'company-lsp company-backends))
 (use-package lsp-mode
   :ensure t
-  ;; :custom
-  ;; (lsp-print-io t)
-  ;; (lsp-trace t)
+  :custom
+  (lsp-auto-guess-root t)
+  (lsp-log-max 100000)
   :config
   (lsp-register-client
    (make-lsp-client
@@ -986,12 +986,14 @@ before to call this function."
                      '("opam" "exec" "--" "ocamlmerlin-lsp"))
     :major-modes '(caml-mode tuareg-mode reason-mode)
     :server-id 'ocamlmerlin-lsp))
-  (defun my/merlin-lsp--on-hover ()
+  (defun my/merlin-lsp--hover ()
     (when (my/merlin-lsp--valid-type-position-p (point))
       (lsp-hover)))
+  (defun my/merlin-lsp--document-highlight ()
+    (when (my/merlin-lsp--valid-type-position-p (point))
+      (lsp-document-highlight)))
   (defun my/merlin-lsp-setup-eldoc ()
-    (setq-local lsp-eldoc-hook (remove 'lsp-hover lsp-eldoc-hook))
-    (push 'my/merlin-lsp--on-hover lsp-eldoc-hook))
+    (setq-local lsp-eldoc-hook '(my/merlin-lsp--hover my/merlin-lsp--document-highlight)))
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-references] . lsp-ui-peek-find-references))
   :hook
@@ -1040,8 +1042,7 @@ compilation and utop commands.
 (use-package json-reformat
   :ensure t
   :custom
-  (json-reformat:indent-width 1)
-  )
+  (json-reformat:indent-width 1))
 #+END_SRC
 
 Based on [[https://emacs.cafe/emacs/guest-post/2017/06/26/hierarchy.html][hierarchy.el]]:
@@ -1656,6 +1657,39 @@ consistent as it doesn't pad source blocks with leading spaces.
 #+END_SRC
 
 * Linum
+** Emacs 26
+
+#+begin_src emacs-lisp
+(use-package display-line-numbers
+  :if (version<= "26.0" emacs-version)
+  :config
+  (global-display-line-numbers-mode)
+  (defcustom display-line-numbers-disabled-modes-list
+    '(eshell-mode wl-summary-mode compilation-mode org-mode text-mode dired-mode doc-view-mode)
+    "List of modes disabled when global display-line-numbers mode
+is on"
+    :type '(repeat (sexp :tag "Major mode"))
+    :tag " Major modes where display-line-numbers is disabled: "
+    :group 'display-line-numbers)
+  (defcustom display-line-numbers-disable-starred-buffers 't
+    "Disable buffers that have stars in them like *Gnu Emacs*"
+    :type 'boolean
+    :group 'display-line-numbers)
+
+  (defun display-line-numbers--turn-on ()
+    "When display-line-numbers is running globally, disable line
+number in modes defined in
+`display-line-numbers-disabled-modes-list'. Also turns off
+numbering in starred modes like *scratch*"
+    (unless (or (minibufferp)
+                (and (daemonp) (null (frame-parameter nil 'client)))
+                ;; additions to original `display-line-numbers--turn-on'
+                (member major-mode display-line-numbers-disabled-modes-list)
+                (and display-line-numbers-disable-starred-buffers (string-match "*" (buffer-name))))
+      (display-line-numbers-mode))))
+#+end_src
+
+** Emacs 25
 
 It's seems to be a challenge to display line numbers. For
 performances reasons, people say to use ~nlinum~. But I can't do
@@ -1663,6 +1697,7 @@ customization as with the normal linum mode.
 
 #+BEGIN_SRC emacs-lisp
 (use-package linum
+  :if (version< emacs-version "26.0")
   :custom
   (linum-format " %2d") ; numbers in the line gutter don't touch the left
   :config
@@ -1686,7 +1721,6 @@ customization as with the normal linum mode.
                 )
       (linum-mode 1)))
   )
-
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
