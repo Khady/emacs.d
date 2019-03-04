@@ -946,43 +946,37 @@ before to call this function."
          (not comment)
          (or (not keyword) string))))
 
-(use-package helm-lsp :ensure t)
-(use-package lsp-ui
-  :ensure t
-  :custom
-  (lsp-ui-doc-position 'bottom)
-  (lsp-ui-sideline-enable nil)
-  (lsp-ui-peek-peek-height 5))
-(use-package company-lsp
-  :ensure t
-  :custom
-  (company-lsp-cache-candidates nil)
-  :config
-  (push 'company-lsp company-backends))
-(use-package lsp-mode
-  :ensure t
-  :custom
-  (lsp-log-max 100000)
-  :config
+(defun my/merlin-lsp--hover ()
+  "Call lsp-hover only in valid hover positions."
+  (if (my/merlin-lsp--valid-type-position-p (point))
+      (lsp-hover)
+    (lsp-ui-doc-hide)))
+
+(defun my/merlin-lsp--document-highlight ()
+  "Call lsp-document-highlight only in valid hover positions."
+  (when (my/merlin-lsp--valid-type-position-p (point))
+    (lsp-document-highlight)))
+
+(defun my/merlin-lsp--setup-eldoc ()
+  "Replace default lsp-eldoc-hook with custom functions checking
+the validity of the position."
+  (setq-local lsp-eldoc-hook
+              '(my/merlin-lsp--hover my/merlin-lsp--document-highlight)))
+
+(defun my/merlin-lsp-register ()
+  "Register a lsp server for ocaml. This functions must be called
+only after lsp-mode has been loaded."
   (lsp-register-client
    (make-lsp-client
     :new-connection (lsp-stdio-connection
                      '("opam" "exec" "--" "ocamlmerlin-lsp"))
     :major-modes '(caml-mode tuareg-mode reason-mode)
-    :server-id 'ocamlmerlin-lsp))
-  (defun my/merlin-lsp--hover ()
-    (when (my/merlin-lsp--valid-type-position-p (point))
-      (lsp-hover)))
-  (defun my/merlin-lsp--document-highlight ()
-    (when (my/merlin-lsp--valid-type-position-p (point))
-      (lsp-document-highlight)))
-  (defun my/merlin-lsp-setup-eldoc ()
-    (setq-local lsp-eldoc-hook '(my/merlin-lsp--hover my/merlin-lsp--document-highlight)))
-  :bind (:map lsp-ui-mode-map
-              ([remap xref-find-references] . lsp-ui-peek-find-references))
-  :hook
-  ((tuareg-mode reason-mode) . lsp)
-  ((tuareg-mode reason-mode) . my/merlin-lsp-setup-eldoc))
+    :server-id 'ocamlmerlin-lsp)))
+
+(defun my/merlin-lsp ()
+  "Setup and start merlin-lsp."
+  (my/merlin-lsp--setup-eldoc)
+  (lsp))
 #+end_src
 
 #+BEGIN_SRC fish
@@ -1119,6 +1113,34 @@ I use fish as a shell
 (use-package fish-mode
   :ensure t)
 #+END_SRC
+
+* LSP
+
+#+begin_src emacs-lisp
+(use-package helm-lsp :ensure t)
+(use-package lsp-ui
+  :ensure t
+  :custom
+  (lsp-ui-doc-position 'bottom)
+  (lsp-ui-sideline-enable nil)
+  (lsp-ui-peek-peek-height 5))
+(use-package company-lsp
+  :ensure t
+  :custom
+  (company-lsp-cache-candidates nil)
+  :config
+  (push 'company-lsp company-backends))
+(use-package lsp-mode
+  :ensure t
+  :custom
+  (lsp-log-max 100000)
+  :config
+  (my/merlin-lsp-register)
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-references] . lsp-ui-peek-find-references))
+  :hook
+  (tuareg-mode . my/merlin-lsp))
+#+end_src
 
 * Whitespace
 

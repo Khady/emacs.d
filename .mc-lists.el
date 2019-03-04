@@ -25,6 +25,7 @@
         org-self-insert-command
         org-yank
         paredit-backward
+        paredit-close-square
         paredit-comment-dwim
         paredit-doublequote
         paredit-forward
