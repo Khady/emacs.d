@@ -61,8 +61,10 @@ Mai]] and [[https://github.com/technomancy/better-defaults][Better defaults]].
 
 (column-number-mode t)
 
-(global-visual-line-mode)
-(diminish 'visual-line-mode)
+;; (global-visual-line-mode)
+;; (diminish 'visual-line-mode)
+
+(setq line-move-visual nil)
 
 (setq uniquify-buffer-name-style 'forward)
 
@@ -79,16 +81,16 @@ Mai]] and [[https://github.com/technomancy/better-defaults][Better defaults]].
 
 (autoload 'zap-up-to-char "misc"
   "Kill up to, but not including ARGth occurrence of CHAR." t)
-(global-set-key (kbd "M-z") 'zap-up-to-char)
+(bind-key "M-z" #'zap-up-to-char)
 
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+(setq ediff-window-setup-function #'ediff-setup-windows-plain)
 
 (setq apropos-do-all t)
 
 (setq mouse-yank-at-point t)
 
 ;; all files must have a newline at the end
-(setq require-final-newline t)
+;; (setq require-final-newline t)
 #+END_SRC
 
 *** Backups
@@ -142,9 +144,8 @@ successful. But its behavior is hard to predict.
   :config (bury-successful-compilation 1))
 #+END_SRC
 
-Bucklescript is made of shit. So of course it prints compilation
-messages that are not formated correctly. And it doesn't want to
-disable colors.
+Bucklescript prints compilation messages that are not formated
+correctly. And it doesn't want to disable colors.
 
 #+BEGIN_SRC emacs-lisp
 (require 'compile)
@@ -410,65 +411,6 @@ Disable hl-line-mode when in a terminal.
           '(lambda () (hl-line-mode (if (equal major-mode 'term-mode) 0 1))))
 #+END_SRC
 
-* Mac customizations
-
-There are configurations to make when running Emacs on macOS (hence the
-"darwin" system-type check).
-
-#+BEGIN_SRC emacs-lisp
-(when (string-equal system-type "darwin")
-  ;; delete files by moving them to the trash
-  (setq delete-by-moving-to-trash t)
-  (setq trash-directory "~/.Trash")
-
-  ;; Don't make new frames when opening a new file with Emacs
-  (setq ns-pop-up-frames nil)
-
-  ;; set the Fn key as the hyper key
-  (setq ns-function-modifier 'hyper)
-
-  ;; Use Command-` to switch between Emacs windows (not frames)
-  (bind-key "s-`" 'other-window)
-
-  ;; Use Command-Shift-` to switch Emacs frames in reverse
-  (bind-key "s-~" (lambda() () (interactive) (other-window -1)))
-
-  ;; Because of the keybindings above, set one for `other-frame'
-  (bind-key "s-1" 'other-frame)
-
-  ;; Fullscreen!
-  (setq ns-use-native-fullscreen nil) ; Not Lion style
-  (bind-key "<s-return>" 'toggle-frame-fullscreen)
-
-  ;; buffer switching
-  (bind-key "s-{" 'previous-buffer)
-  (bind-key "s-}" 'next-buffer)
-
-  ;; Compiling
-  (bind-key "H-c" 'compile)
-  (bind-key "H-r" 'recompile)
-  (bind-key "H-s" (defun save-and-recompile () (interactive) (save-buffer) (recompile)))
-
-  ;; disable the key that minimizes emacs to the dock because I don't
-  ;; minimize my windows
-  ;; (global-unset-key (kbd "C-z"))
-
-  ;; Not going to use these commands
-  (put 'ns-print-buffer 'disabled t)
-  (put 'suspend-frame 'disabled t))
-#+END_SRC
-
-~exec-path-from-shell~ makes the command-line path with Emacs's shell
-match the same one on macOS.
-
-#+BEGIN_SRC emacs-lisp
-(use-package exec-path-from-shell
-  :if (memq window-system '(mac ns))
-  :ensure t
-  :init
-  (exec-path-from-shell-initialize))
-#+END_SRC
-
 * List buffers
 
 ibuffer is the improved version of list-buffers.
@@ -572,6 +514,7 @@ Popup for documentation or help
 
 #+BEGIN_SRC emacs-lisp
 (use-package company-quickhelp
+  :commands (company-quickhelp-mode)
   :ensure t
   :bind (:map company-active-map
               ("M-h" . company-quickhelp-manual-begin)))
@@ -592,7 +535,7 @@ Rainbow delimiters, to have a different color for each level of
 (use-package paren
   :ensure t
   :custom
-  (show-paren-delay 0)
+  (show-paren-delay 0.3)
   (blink-matching-paren t)
   (blink-matching-paren-on-screen t)
   (show-paren-style 'expression)
@@ -979,10 +922,6 @@ only after lsp-mode has been loaded."
   (lsp))
 #+end_src
 
-#+BEGIN_SRC fish
-yarn global add ocaml-language-server
-#+END_SRC
-
 *** dir locals
 
 Then it is possible to create a ~.dir-locals.el~ file to setup
@@ -1121,7 +1060,6 @@ I use fish as a shell
 (use-package lsp-ui
   :ensure t
   :custom
-  (lsp-ui-doc-position 'bottom)
   (lsp-ui-sideline-enable nil)
   (lsp-ui-peek-peek-height 5))
 (use-package company-lsp
@@ -1150,7 +1088,6 @@ I use fish as a shell
   :diminish global-whitespace-mode
   :custom
   (whitespace-style '(face empty tabs lines-tail trailing))
-  (whitespace-line-column 160)
   :config
   (global-whitespace-mode t))
 #+END_SRC
@@ -1238,8 +1175,7 @@ from ~git-gutter-fringe~.
 #+BEGIN_SRC emacs-lisp
 (use-package git-gutter
   :ensure t
-  :diminish
-  )
+  :diminish)
 
 (use-package git-gutter-fringe
   :ensure t
@@ -1818,10 +1754,10 @@ configuration.
 Convenient keybindings to resize windows.
 
 #+BEGIN_SRC emacs-lisp
-(bind-key "M-S-C-<left>" 'shrink-window-horizontally)
-(bind-key "M-S-C-<right>" 'enlarge-window-horizontally)
-(bind-key "M-S-C-<down>" 'shrink-window)
-(bind-key "M-S-C-<up>" 'enlarge-window)
+(bind-key "M-S-C-<left>" #'shrink-window-horizontally)
+(bind-key "M-S-C-<right>" #'enlarge-window-horizontally)
+(bind-key "M-S-C-<down>" #'shrink-window)
+(bind-key "M-S-C-<up>" #'enlarge-window)
 #+END_SRC
 
 ** Windmove
@@ -1829,10 +1765,10 @@ Convenient keybindings to resize windows.
 Bind arrow keys to move between windows:
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(bind-key "M-<up>" 'windmove-up)
-(bind-key "M-<down>" 'windmove-down)
-(bind-key "M-<right>" 'windmove-right)
-(bind-key "M-<left>" 'windmove-left)
+(bind-key "M-<up>" #'windmove-up)
+(bind-key "M-<down>" #'windmove-down)
+(bind-key "M-<right>" #'windmove-right)
+(bind-key "M-<left>" #'windmove-left)
 #+END_SRC
 
 It could be done like this too:
@@ -1869,8 +1805,8 @@ do just that to reduce the repetition.
   (split-window-horizontally)
   (other-window 1 nil))
 
-(bind-key "C-x 2" 'vsplit-other-window)
-(bind-key "C-x 3" 'hsplit-other-window)
+(bind-key "C-x 2" #'vsplit-other-window)
+(bind-key "C-x 3" #'hsplit-other-window)
 #+END_SRC
 
 Dedicated windows.
@@ -1894,7 +1830,7 @@ Dedicated windows.
   nil " sticky" nil
   (set-window-dedicated-p (selected-window) sticky-buffer-mode))
 
-(bind-key "C-c C-'" 'toggle-window-dedicated)
+(bind-key "C-c C-'" #'toggle-window-dedicated)
 #+END_SRC
 
 ** Ace window
