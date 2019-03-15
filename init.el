@@ -24,13 +24,13 @@
 ;; use-package is used to configure the rest of the packages.
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
-  (package-install 'diminish)
+  (package-install 'delight)
   (package-install 'use-package))
 
 ;; From use-package README
 (eval-when-compile
   (require 'use-package))
-(require 'diminish)                ;; if you use :diminish
+(require 'delight)                ;; if you use :delight
 (require 'bind-key)
 
 ;; Use a hook so the message doesn't get clobbered by other messages.
@@ -44,6 +44,6 @@
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "config.org"))
-;; (load-file "~/.emacs.d/debug-config.el")
+;; (load-file "~/.emacs.d/minimal.el")
 
 (setq gc-cons-threshold (* 1 1024 1024))

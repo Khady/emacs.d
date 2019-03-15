@@ -126,7 +126,7 @@ Auto reload file when there is a change
 
 #+BEGIN_SRC emacs-lisp
 (global-auto-revert-mode t)
-(diminish 'auto-revert-mode)
+(delight 'auto-revert-mode)
 #+END_SRC
 
 *** Compilation
@@ -321,7 +321,7 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 Use environment variables to choose theme.
 
 #+BEGIN_SRC emacs-lisp
-(setq my/default-theme 'doom-one-light)
+(setq my/default-theme 'doom-one)
 (setq my/bad-id-theme 'whiteboard)
 
 (defun my/print-env-theme (kind expected)
@@ -402,6 +402,28 @@ Note: To view all fonts that are available to use, run the following:
 (font-family-list)
 #+END_SRC
 
+* Mode line
+
+Remove =(vc-mode vc-mode)= from mode line.
+
+#+begin_src emacs-lisp
+(setq-default mode-line-format
+              '("%e"
+                mode-line-front-space
+                mode-line-mule-info
+                mode-line-client
+                mode-line-modified
+                mode-line-remote
+                mode-line-frame-identification
+                mode-line-buffer-identification
+                " "
+                mode-line-position
+                " "
+                mode-line-misc-info
+                mode-line-modes
+                mode-line-end-spaces))
+#+end_src
+
 * Terminal
 
 Disable hl-line-mode when in a terminal.
@@ -435,9 +457,12 @@ source: http://ergoemacs.org/emacs/emacs_buffer_management.html
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :ensure t
+  :delight
   :bind (:map projectile-mode-map
               ("C-c p" . projectile-command-map)
-              ("<f6>" . projectile-compile-project))
+              ("<f6>" . projectile-compile-project)
+              ("M-j" . projectile-find-file)
+              ("M-C-j" . projectile-switch-project))
   :custom
   (projectile-completion-system 'helm)
   (projectile-enable-caching t)
@@ -459,7 +484,14 @@ source: http://ergoemacs.org/emacs/emacs_buffer_management.html
   :ensure t
   :bind
   ("<f7>"  . flymake-goto-prev-error)
-  ("<f8>"  . flymake-goto-next-error))
+  ("<f8>"  . flymake-goto-next-error)
+  :config
+  (defun flymake--transform-mode-line-format (ret)
+    "Change the output of `flymake--mode-line-format'."
+    (setf (seq-elt (car ret) 1) " FM")
+    ret)
+  (advice-add #'flymake--mode-line-format
+              :filter-return #'flymake--transform-mode-line-format))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -478,6 +510,7 @@ echo area. Usually it is the signature of a function.
 #+BEGIN_SRC emacs-lisp
 (use-package eldoc
   :ensure t
+  :delight
   :hook (eval-expression-minibuffer-setup . eldoc-mode))
 #+END_SRC
 
@@ -498,6 +531,7 @@ I use company mode as a completion backend
 #+BEGIN_SRC emacs-lisp
 (use-package company
   :ensure t
+  :delight
   :custom
   (company-quickhelp-delay 0)
   (company-idle-delay nil)
@@ -569,6 +603,7 @@ Autopair is now replaced with electric-pair-mode.
 #+BEGIN_SRC emacs-lisp
 (use-package paredit
   :ensure t
+  :delight
   :config
   (defun paredit-kill-region-or-word ()
     "Call `paredit-kill-region' or `paredit-backward-kill-word' depending
@@ -660,6 +695,7 @@ the same as the length of ~comment-start~ to preserve indentation.
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :ensure t
+  :delight "caml"
   :bind (:map tuareg-mode-map
               ("M-;" . comment-dwim) ; restore default comment command
               ("C-w" . paredit-kill-region-or-word))
@@ -730,21 +766,21 @@ Configure merlin. Magical autocompletion and IDE features.
   (merlin-completion-with-doc t)
   (merlin-error-check-then-move nil)
   (merlin-command 'opam)
-  (merlin-error-after-save nil)
+  (merlin-error-after-save t)
   :custom-face
-  ;; (merlin-type-face ((t (:background "firebrick")))) ;; doom-one
-  (merlin-type-face ((t (:background "#a0bcf8")))) ;; doom-one-light
+  (merlin-type-face ((t (:background "firebrick")))) ;; doom-one
+  ;; (merlin-type-face ((t (:background "#a0bcf8")))) ;; doom-one-light
   :bind (:map merlin-mode-map
-              ;; ("M-." . merlin-locate)
-              ;; ("M-," . merlin-pop-stack)
-              ;; ("M-?" . merlin-occurrences)
+              ("M-." . merlin-locate)
+              ("M-," . merlin-pop-stack)
+              ("M-?" . merlin-occurrences)
               ("C-c m j" . merlin-jump)
               ("C-c m i" . merlin-locate-ident)
               ("C-c m e" . merlin-iedit-occurrences)
               ("C-c m d" . merlin-document))
   :hook
   ;; Start merlin on ml files
-  ((reason-mode tuareg-mode) . merlin-mode)
+  ((reason-mode) . merlin-mode)
   :config
   (setq company-backends (remove 'merlin-company-backend company-backends)))
 #+END_SRC
@@ -764,7 +800,6 @@ point after a small delay. Provides a merlin backend to
 #+BEGIN_SRC emacs-lisp
 (use-package merlin-eldoc
   ;; :load-path "/home/louis/Code/github/merlin-eldoc"
-  :disabled
   :ensure t
   :custom
   (eldoc-echo-area-use-multiline-p t)
@@ -773,12 +808,10 @@ point after a small delay. Provides a merlin backend to
   (merlin-eldoc-type-verbosity 'min)
   (merlin-eldoc-function-arguments nil)
   (merlin-eldoc-doc nil)
-  ;; start to replace merlin-eldoc with merlin-lsp
-  (merlin-eldoc-type nil)
   :bind (:map merlin-mode-map
               ("C-c m p" . merlin-eldoc-jump-to-prev-occurrence)
               ("C-c m n" . merlin-eldoc-jump-to-next-occurrence))
-  :hook ((tuareg-mode reason-mode) . merlin-eldoc-setup))
+  :hook ((reason-mode) . merlin-eldoc-setup))
 #+END_SRC
 
 *** utop
@@ -786,7 +819,7 @@ point after a small delay. Provides a merlin backend to
 #+BEGIN_SRC emacs-lisp
 (use-package utop
   :if utop-p
-  :diminish utop-minor-mode
+  :delight utop-minor-mode
   :custom (utop-edit-command t)
   :commands (utop-minor-mode)
   :init
@@ -891,9 +924,8 @@ before to call this function."
 
 (defun my/merlin-lsp--hover ()
   "Call lsp-hover only in valid hover positions."
-  (if (my/merlin-lsp--valid-type-position-p (point))
-      (lsp-hover)
-    (lsp-ui-doc-hide)))
+  (when (my/merlin-lsp--valid-type-position-p (point))
+    (lsp-hover)))
 
 (defun my/merlin-lsp--document-highlight ()
   "Call lsp-document-highlight only in valid hover positions."
@@ -912,9 +944,9 @@ only after lsp-mode has been loaded."
   (lsp-register-client
    (make-lsp-client
     :new-connection (lsp-stdio-connection
-                     '("opam" "exec" "--" "ocamlmerlin-lsp"))
+                     '("opam" "exec" "--" "/home/louis/.opam/ocaml-base-compiler.4.07.1/bin/ocamlmerlin-lsp"))
     :major-modes '(caml-mode tuareg-mode reason-mode)
-    :server-id 'ocamlmerlin-lsp)))
+    :server-id 'caml)))
 
 (defun my/merlin-lsp ()
   "Setup and start merlin-lsp."
@@ -1058,8 +1090,11 @@ I use fish as a shell
 #+begin_src emacs-lisp
 (use-package helm-lsp :ensure t)
 (use-package lsp-ui
+  :load-path "/home/louis/Code/github/lsp-ui"
   :ensure t
   :custom
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-position 'at-point)
   (lsp-ui-sideline-enable nil)
   (lsp-ui-peek-peek-height 5))
 (use-package company-lsp
@@ -1072,6 +1107,7 @@ I use fish as a shell
   :ensure t
   :custom
   (lsp-log-max 100000)
+  (lsp-eldoc-render-all nil)
   :config
   (my/merlin-lsp-register)
   :bind (:map lsp-ui-mode-map
@@ -1085,8 +1121,9 @@ I use fish as a shell
 #+BEGIN_SRC emacs-lisp
 (use-package whitespace
   :ensure t
-  :diminish global-whitespace-mode
+  :delight global-whitespace-mode
   :custom
+  (whitespace-line-column nil)
   (whitespace-style '(face empty tabs lines-tail trailing))
   :config
   (global-whitespace-mode t))
@@ -1098,7 +1135,7 @@ Same indentation rules everywhere.
 
 #+BEGIN_SRC emacs-lisp
 (use-package editorconfig
-  :diminish
+  :delight
   :ensure t
   :config (editorconfig-mode t))
 #+END_SRC
@@ -1175,7 +1212,7 @@ from ~git-gutter-fringe~.
 #+BEGIN_SRC emacs-lisp
 (use-package git-gutter
   :ensure t
-  :diminish)
+  :delight)
 
 (use-package git-gutter-fringe
   :ensure t
@@ -1202,6 +1239,15 @@ bother with other packages?
                '("git\\.ahrefs\\.com" git-link-github)))
 #+END_SRC
 
+* imenu
+
+#+begin_src emacs-lisp
+(use-package which-func
+  :commands which-function-mode
+  :init
+  (which-function-mode t))
+#+end_src
+
 * Helm
 
 https://github.com/emacs-helm/helm/wiki/Fuzzy-matching
@@ -1209,7 +1255,7 @@ https://github.com/emacs-helm/helm/wiki/Fuzzy-matching
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
-  :diminish helm-mode
+  :delight helm-mode
   :config
   (helm-mode t)
   :custom
@@ -1224,7 +1270,8 @@ https://github.com/emacs-helm/helm/wiki/Fuzzy-matching
          ("C-`" . helm-resume)
          ("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
-         ("C-x C-f" . helm-find-files)))
+         ("C-x C-f" . helm-find-files)
+         ("M-n" . helm-imenu-in-all-buffers)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -1705,7 +1752,7 @@ I never took time to really use this...
 #+BEGIN_SRC emacs-lisp
 (use-package undo-tree
   :ensure t
-  :diminish
+  :delight
   :config
   (global-undo-tree-mode))
 #+END_SRC
@@ -1965,7 +2012,7 @@ I always forget which server is in use.
 #+BEGIN_SRC emacs-lisp
 (use-package which-key
   :ensure t
-  :diminish
+  :delight
   :config
   (which-key-mode))
 #+END_SRC
