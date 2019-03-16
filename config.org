@@ -404,7 +404,7 @@ Note: To view all fonts that are available to use, run the following:
 
 * Mode line
 
-Remove =(vc-mode vc-mode)= from mode line.
+Move =(vc-mode vc-mode)= at the end of the mode line.
 
 #+begin_src emacs-lisp
 (setq-default mode-line-format
@@ -421,6 +421,7 @@ Remove =(vc-mode vc-mode)= from mode line.
                 " "
                 mode-line-misc-info
                 mode-line-modes
+                (vc-mode vc-mode)
                 mode-line-end-spaces))
 #+end_src
 
