@@ -91,6 +91,8 @@ Mai]] and [[https://github.com/technomancy/better-defaults][Better defaults]].
 
 ;; all files must have a newline at the end
 ;; (setq require-final-newline t)
+
+(setq wdired-allow-to-change-permissions t)
 #+END_SRC
 
 *** Backups
@@ -149,13 +151,34 @@ correctly. And it doesn't want to disable colors.
 
 #+BEGIN_SRC emacs-lisp
 (require 'compile)
-;; The messages from -bs-super-errors are not standard
-(add-to-list
- 'compilation-error-regexp-alist
- '("^[ \t]*\\(?:We've found a bug for you!\\)?\\(?:Warning number \\([0-9]+\\)\\)?[\n ]*\
+(defconst bucklescript-compilation-regexp
+  "^[ \t]*\\(?:We've found a bug for you!\\)?\\(?:Warning number \\([0-9]+\\)\\)?[\n ]*\
 \\([^ ]+\\) +\\([0-9]+\\):\\([0-9]+\\)-?\\(?:\\([0-9]+\\):\\)?\\([0-9]+\\)?$"
-   2 (3 . 5) (4 . 6) 1))
+  "The messages from -bs-super-errors are not standard")
+(add-to-list
+ 'compilation-error-regexp-alist-alist
+ `(bucklescript ,bucklescript-compilation-regexp 2 (3 . 5) (4 . 6) 1))
+(add-to-list 'compilation-error-regexp-alist 'bucklescript)
 #+END_SRC
+
+Util function to help detecting which compilation regexp matched.
+
+#+begin_src emacs-lisp
+(defun test-compilation-error-regexps ()
+  (interactive)
+  (save-excursion
+    (let ((matched nil))
+      (dolist (rule compilation-error-regexp-alist)
+        (let* ((item (if (symbolp rule)
+		         (cdr (assq rule
+				    compilation-error-regexp-alist-alist))
+		       rule))
+	       (pat (car item)))
+          (goto-char (point-min))
+          (when (re-search-forward pat nil t)
+	    (push rule matched))))
+      (message "matched: %s" (nreverse matched)))))
+#+end_src
 
 #+BEGIN_SRC emacs-lisp
 (use-package xterm-color
@@ -532,7 +555,6 @@ I use company mode as a completion backend
 #+BEGIN_SRC emacs-lisp
 (use-package company
   :ensure t
-  :delight
   :custom
   (company-quickhelp-delay 0)
   (company-idle-delay nil)
@@ -696,7 +718,7 @@ the same as the length of ~comment-start~ to preserve indentation.
 #+BEGIN_SRC emacs-lisp
 (use-package tuareg
   :ensure t
-  :delight "caml"
+  :delight "O"
   :bind (:map tuareg-mode-map
               ("M-;" . comment-dwim) ; restore default comment command
               ("C-w" . paredit-kill-region-or-word))
@@ -712,6 +734,14 @@ the same as the length of ~comment-start~ to preserve indentation.
   (defun my/setup-tuareg ()
     (interactive)
     (setq-local comment-style 'indent))
+  ;; the regexp created by caml and tuareg are incorrect
+  (setq compilation-error-regexp-alist
+        (delete 'ocaml compilation-error-regexp-alist))
+  ;; move the good regexp at the front
+  (setq compilation-error-regexp-alist
+        (delete 'python-tracebacks-and-caml compilation-error-regexp-alist))
+  (setq compilation-error-regexp-alist
+        (add-to-list 'compilation-error-regexp-alist 'python-tracebacks-and-caml))
   :hook
   (tuareg-mode . my/setup-tuareg))
 #+END_SRC
@@ -947,12 +977,24 @@ only after lsp-mode has been loaded."
     :new-connection (lsp-stdio-connection
                      '("opam" "exec" "--" "/home/louis/.opam/ocaml-base-compiler.4.07.1/bin/ocamlmerlin-lsp"))
     :major-modes '(caml-mode tuareg-mode reason-mode)
-    :server-id 'caml)))
+    :server-id 'O)))
 
 (defun my/merlin-lsp ()
   "Setup and start merlin-lsp."
   (my/merlin-lsp--setup-eldoc)
   (lsp))
+#+end_src
+
+For debug only
+
+#+begin_src emacs-lisp :tangle no
+(lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     '("/home/louis/Code/github/merlin/_build/default/src/frontend/lsp/ocamlmerlin_lsp.exe"))
+    :major-modes '(caml-mode tuareg-mode reason-mode)
+    :priority 1
+    :server-id 'merlin-test))
 #+end_src
 
 *** dir locals
@@ -1073,7 +1115,7 @@ Based on [[https://emacs.cafe/emacs/guest-post/2017/06/26/hierarchy.html][hierar
 
 I use fish as a shell
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package fish-completion
   :ensure t)
 (when (and (executable-find "fish")

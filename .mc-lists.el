@@ -7,8 +7,10 @@
         autopair-insert-or-skip-quote
         autopair-skip-close-maybe
         backward-sexp
+        backward-up-list
         beginning-of-visual-line
         comment-dwim
+        delete-indentation
         electric-pair-delete-pair
         end-of-visual-line
         evilmi-jump-items
@@ -55,6 +57,7 @@
       '(
         ace-window
         iedit-switch-to-mc-mode
+        ocamlformat
         tuareg-electric-rp
         undo-tree-visualize
         ))
