@@ -1156,7 +1156,9 @@ I use fish as a shell
   :config
   (my/merlin-lsp-register)
   :bind (:map lsp-ui-mode-map
-              ([remap xref-find-references] . lsp-ui-peek-find-references))
+              ([remap xref-find-references] . lsp-ui-peek-find-references)
+              :map lsp-mode-map
+              ("C-c r" . lsp-rename))
   :hook
   (tuareg-mode . my/merlin-lsp))
 #+end_src
