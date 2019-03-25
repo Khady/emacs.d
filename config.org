@@ -734,14 +734,16 @@ the same as the length of ~comment-start~ to preserve indentation.
   (defun my/setup-tuareg ()
     (interactive)
     (setq-local comment-style 'indent))
-  ;; the regexp created by caml and tuareg are incorrect
-  (setq compilation-error-regexp-alist
-        (delete 'ocaml compilation-error-regexp-alist))
-  ;; move the good regexp at the front
-  (setq compilation-error-regexp-alist
-        (delete 'python-tracebacks-and-caml compilation-error-regexp-alist))
-  (setq compilation-error-regexp-alist
-        (add-to-list 'compilation-error-regexp-alist 'python-tracebacks-and-caml))
+  (defconst my/ocaml-compilation-regexp
+    "^[ \t]*File \\(\"?\\)\\([^,\" \n\t<>]+\\)\\1, lines? \\([0-9]+\\)-?\\([0-9]+\\)?\\(?:$\\|,\
+\\(?: characters? \\([0-9]+\\)-?\\([0-9]+\\)?:\\)?\
+\\(?:\n\\(?:\\(?:^[0-9]+ | .*$\\)\\|\\(?:^[ \t]*^+$\\)\\)\\)*\
+\\([ \n]Warning\\(?: [0-9]+\\)?:\\)?\\)"
+    "Update the ocaml regexp to support 4.08")
+  (add-to-list
+   'compilation-error-regexp-alist-alist
+   `(my/ocaml ,my/ocaml-compilation-regexp 2 (3 . 4) (5 . 6) (7)))
+  (add-to-list 'compilation-error-regexp-alist 'my/ocaml)
   :hook
   (tuareg-mode . my/setup-tuareg))
 #+END_SRC
