@@ -1,4 +1,6 @@
-(setq gc-cons-threshold (* 1024 1024 1024))
+;; (setq gc-cons-threshold (* 1024 1024 1024))
+(setq gc-cons-threshold 402653184
+      gc-cons-percentage 0.6)
 
 ;;; Begin initialization
 ;; Turn off mouse interface early in startup to avoid momentary display
@@ -46,4 +48,6 @@
 (org-babel-load-file (concat user-emacs-directory "config.org"))
 ;; (load-file "~/.emacs.d/minimal.el")
 
-(setq gc-cons-threshold (* 1 1024 1024))
+;; (setq gc-cons-threshold (* 1 1024 1024))
+(setq gc-cons-threshold 16777216
+        gc-cons-percentage 0.1)
