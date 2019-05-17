@@ -538,16 +538,6 @@ echo area. Usually it is the signature of a function.
   :hook (eval-expression-minibuffer-setup . eldoc-mode))
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package eldoc-box
-  :if (version<= "26.0" emacs-version)
-  :quelpa ((eldoc-box :fetcher github :repo "casouri/eldoc-box"))
-  :custom
-  (eldoc-box-max-pixel-width 1400)
-  (eldoc-box-max-pixel-height 800)
-  :hook (eglot--managed-mode . eldoc-box-hover-mode-hook))
-#+END_SRC
-
 * Completion
 
 I use company mode as a completion backend
@@ -1138,7 +1128,7 @@ I use fish as a shell
   :load-path "/home/louis/Code/github/lsp-ui"
   :ensure t
   :custom
-  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-enable nil)
   (lsp-ui-doc-position 'at-point)
   (lsp-ui-sideline-enable nil)
   (lsp-ui-peek-peek-height 5))
@@ -1152,7 +1142,8 @@ I use fish as a shell
   :ensure t
   :custom
   (lsp-log-max 100000)
-  (lsp-eldoc-render-all nil)
+  (lsp-eldoc-render-all t)
+  (lsp-enable-snippet nil)
   :config
   (my/merlin-lsp-register)
   :bind (:map lsp-ui-mode-map
@@ -1695,7 +1686,7 @@ consistent as it doesn't pad source blocks with leading spaces.
 * Linum
 ** Emacs 26
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package display-line-numbers
   :if (version<= "26.0" emacs-version)
   :config
