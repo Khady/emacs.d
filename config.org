@@ -803,7 +803,7 @@ Configure merlin. Magical autocompletion and IDE features.
               ("C-c m d" . merlin-document))
   :hook
   ;; Start merlin on ml files
-  ((reason-mode) . merlin-mode)
+  ((tuareg-mode reason-mode) . merlin-mode)
   :config
   (setq company-backends (remove 'merlin-company-backend company-backends)))
 #+END_SRC
@@ -834,7 +834,7 @@ point after a small delay. Provides a merlin backend to
   :bind (:map merlin-mode-map
               ("C-c m p" . merlin-eldoc-jump-to-prev-occurrence)
               ("C-c m n" . merlin-eldoc-jump-to-next-occurrence))
-  :hook ((reason-mode) . merlin-eldoc-setup))
+  :hook ((tuareg-mode reason-mode) . merlin-eldoc-setup))
 #+END_SRC
 
 *** utop
@@ -1150,8 +1150,9 @@ I use fish as a shell
               ([remap xref-find-references] . lsp-ui-peek-find-references)
               :map lsp-mode-map
               ("C-c r" . lsp-rename))
-  :hook
-  (tuareg-mode . my/merlin-lsp))
+  ;; :hook
+  ;; (tuareg-mode . my/merlin-lsp)
+  )
 #+end_src
 
 * Whitespace
