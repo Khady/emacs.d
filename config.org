@@ -264,7 +264,7 @@ Install packages from github or local files.
 
 Theme of the [[https://github.com/hlissner/doom-emacs][doom emacs configuration]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package doom-themes
   :ensure t
   :custom
@@ -344,7 +344,7 @@ A dark theme for Emacs, inspired from Niflheim and One Dark
 Use environment variables to choose theme.
 
 #+BEGIN_SRC emacs-lisp
-(setq my/default-theme 'doom-one)
+(setq my/default-theme 'doom-one-light)
 (setq my/bad-id-theme 'whiteboard)
 
 (defun my/print-env-theme (kind expected)
@@ -376,7 +376,7 @@ Use environment variables to choose theme.
       (message "Loading theme `%s'..." selected-theme)
       (load-theme selected-theme t))))
 
-(my/load-theme)
+;; (my/load-theme)
 #+END_SRC
 
 ** Solaire mode
@@ -791,8 +791,9 @@ Configure merlin. Magical autocompletion and IDE features.
   (merlin-command 'opam)
   (merlin-error-after-save t)
   :custom-face
-  (merlin-type-face ((t (:background "firebrick")))) ;; doom-one
+  ;; (merlin-type-face ((t (:background "firebrick")))) ;; doom-one
   ;; (merlin-type-face ((t (:background "#a0bcf8")))) ;; doom-one-light
+  (merlin-type-face ((t (:inherit (highlight)))))
   :bind (:map merlin-mode-map
               ("M-." . merlin-locate)
               ("M-," . merlin-pop-stack)
@@ -967,7 +968,7 @@ only after lsp-mode has been loaded."
   (lsp-register-client
    (make-lsp-client
     :new-connection (lsp-stdio-connection
-                     '("opam" "exec" "--" "/home/louis/.opam/ocaml-base-compiler.4.07.1/bin/ocamlmerlin-lsp"))
+                     '("opam" "exec" "--switch=ocaml-base-compiler.4.07.1" "--" "/home/louis/.opam/ocaml-base-compiler.4.07.1/bin/ocamlmerlin-lsp"))
     :major-modes '(caml-mode tuareg-mode reason-mode)
     :server-id 'O)))
 
@@ -1160,12 +1161,15 @@ I use fish as a shell
 #+BEGIN_SRC emacs-lisp
 (use-package whitespace
   :ensure t
-  :delight global-whitespace-mode
+  :delight whitespace-mode
   :custom
   (whitespace-line-column nil)
   (whitespace-style '(face empty tabs lines-tail trailing))
-  :config
-  (global-whitespace-mode t))
+  ;; When it is enabled globally, there is a problem with magit
+  ;; :config
+  ;; (global-whitespace-mode t)
+  :hook
+  (prog-mode . whitespace-mode))
 #+END_SRC
 
 * Editorconfig
@@ -2075,3 +2079,19 @@ I always forget which server is in use.
 - devdocs lookup https://github.com/skeeto/devdocs-lookup (doesn't work for ocaml)
 - sqlformat https://github.com/purcell/sqlformat
 - wgrep.el https://github.com/mhayashi1120/Emacs-wgrep
+* Tests
+
+#+begin_src emacs-lisp :tangle no
+(require eglot)
+(use-package eglot
+:config
+(add-to-list 'eglot-server-programs '(tuareg-mode . ("opam" "exec" "ocaml-base-compiler.4.07.1" "--" "/home/louis/.opam/ocaml-base-compiler.4.07.1/bin/ocamlmerlin-lsp"))))
+  (defun my-projectile-project-find-function (dir)
+    (let ((root (projectile-project-root dir)))
+      (and root (cons 'transient root))))
+
+  (projectile-mode t)
+
+  (with-eval-after-load 'project
+    (add-to-list 'project-find-functions 'my-projectile-project-find-function))
+#+end_src
