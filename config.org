@@ -452,7 +452,7 @@ Move =(vc-mode vc-mode)= at the end of the mode line.
 
 Disable hl-line-mode when in a terminal.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (add-hook 'after-change-major-mode-hook
           '(lambda () (hl-line-mode (if (equal major-mode 'term-mode) 0 1))))
 #+END_SRC
@@ -545,6 +545,7 @@ I use company mode as a completion backend
 #+BEGIN_SRC emacs-lisp
 (use-package company
   :ensure t
+  :delight " C"
   :custom
   (company-quickhelp-delay 0)
   (company-idle-delay nil)
