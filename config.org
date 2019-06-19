@@ -1283,7 +1283,7 @@ bother with other packages?
                '("git\\.ahrefs\\.com" git-link-github)))
 #+END_SRC
 
-* imenu
+* Which function
 
 #+begin_src emacs-lisp
 (use-package which-func
