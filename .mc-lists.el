@@ -16,6 +16,7 @@
         evilmi-jump-items
         forward-sexp
         helm-M-x
+        helm-show-kill-ring
         indent-for-tab-command
         kill-region-or-word
         kill-visual-line
@@ -34,6 +35,7 @@
         paredit-forward-delete
         paredit-forward-kill-word
         paredit-forward-slurp-sexp
+        paredit-kill
         paredit-kill-region-or-word
         paredit-open-round
         paredit-open-square
@@ -57,6 +59,7 @@
       '(
         ace-window
         iedit-switch-to-mc-mode
+        merlin-pop-stack
         ocamlformat
         tuareg-electric-rp
         undo-tree-visualize

@@ -792,6 +792,7 @@ Configure merlin. Magical autocompletion and IDE features.
   (merlin-error-check-then-move nil)
   (merlin-command 'opam)
   (merlin-error-after-save t)
+  (merlin-locate-preference 'mli)
   :custom-face
   ;; (merlin-type-face ((t (:background "firebrick")))) ;; doom-one
   ;; (merlin-type-face ((t (:background "#a0bcf8")))) ;; doom-one-light
@@ -1126,12 +1127,23 @@ I use fish as a shell
 * LSP
 
 #+begin_src emacs-lisp
+(defun my/yarn-bash-lsp-register ()
+  "Register a lsp server for bash installed globally with
+yarn. This functions must be called only after lsp-mode has been
+loaded."
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection
+                     '("yarn-global.sh" "bash-language-server" "start"))
+    :major-modes '(sh-mode)
+    :server-id 'B)))
+
 (use-package helm-lsp :ensure t)
 (use-package lsp-ui
-  :load-path "/home/louis/Code/github/lsp-ui"
+  ;; :load-path "/home/louis/Code/github/lsp-ui"
   :ensure t
   :custom
-  (lsp-ui-doc-enable nil)
+  (lsp-ui-doc-enable t)
   (lsp-ui-doc-position 'at-point)
   (lsp-ui-sideline-enable nil)
   (lsp-ui-peek-peek-height 5))
@@ -1145,15 +1157,19 @@ I use fish as a shell
   :ensure t
   :custom
   (lsp-log-max 100000)
-  (lsp-eldoc-render-all t)
+  (lsp-eldoc-render-all nil)
+  (lsp-eldoc-enable-hover nil)
   (lsp-enable-snippet nil)
   :config
   (my/merlin-lsp-register)
+  (my/yarn-bash-lsp-register)
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-references] . lsp-ui-peek-find-references)
               :map lsp-mode-map
               ("C-c r" . lsp-rename))
-  ;; :hook
+  :hook
+  (sh-mode . lsp)
+  ;; (python-mode . lsp)
   ;; (tuareg-mode . my/merlin-lsp)
   )
 #+end_src
