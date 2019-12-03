@@ -12,6 +12,8 @@
 (setq inhibit-startup-message t)
 (setq initial-scratch-message nil)
 
+; (setq package-check-signature nil)
+
 ;;; Set up package
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)

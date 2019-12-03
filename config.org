@@ -707,6 +707,16 @@ are not prefixed by ~*~. The length of ~comment-continue~ should be
 the same as the length of ~comment-start~ to preserve indentation.
 
 #+BEGIN_SRC emacs-lisp
+(use-package hideshow
+  :ensure t
+  :delight hs-minor-mode
+  :config
+  (defun deriving-inline-forward-sexp (&optional arg)
+    (search-forward-regexp "\\[@@@end\\]") nil nil arg)
+  (add-to-list 'hs-special-modes-alist
+               '(tuareg-mode "\\[@@deriving_inline[^]]*\\]" "\\[@@@end\\]" nil
+                             deriving-inline-forward-sexp nil)))
+
 (use-package tuareg
   :ensure t
   :delight "O"
@@ -736,8 +746,14 @@ lines? \\([0-9]+\\)-?\\([0-9]+\\)?\
    'compilation-error-regexp-alist-alist
    `(my/ocaml ,my/ocaml-compilation-regexp 3 (4 . 5) (6 . 7) (8) 1))
   (add-to-list 'compilation-error-regexp-alist 'my/ocaml)
+  (defun setup-hide-deriving-inline ()
+    (inline)
+    (hs-minor-mode t)
+    (let ((hs-hide-comments-when-hiding-all nil))
+      (hs-hide-all)))
   :hook
-  (tuareg-mode . my/setup-tuareg))
+  (tuareg-mode . my/setup-tuareg)
+  (tuareg-mode . setup-hide-deriving-inline))
 #+END_SRC
 
 When using ~reason-mode~, we want to load merlin from
@@ -1299,6 +1315,13 @@ bother with other packages?
   :config (add-to-list 'git-link-remote-alist
                '("git\\.ahrefs\\.com" git-link-github)))
 #+END_SRC
+
+** Nice blame
+
+#+begin_src emacs-lisp
+(use-package vc-msg
+  :ensure t)
+#+end_src
 
 * Which function
 
